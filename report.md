@@ -381,9 +381,9 @@ Having cleaned the data and defined our network model it is time to train agains
 
 ## Learning curve
 
-As @fig-learn below shows, the training loss continues to show improvement. However, the validation loss levels out at around epoch 54. This is a clear indication of over-training and that the network is starting to memorize the training data.
+As @fig-learn below shows, the training loss continues to show improvement. However, the validation loss levels out at around epoch 54. This is a clear indication of the start of over-training, and that the network is beginning to memorize the training data.
 
-Displaying the learning curve requires just a few lines of code.
+Displaying the learning curve to evaluate training progress requires just a few lines of Clay code.
 
 ```{clay #fig-learn caption="Learning curve."}
     history = net history
