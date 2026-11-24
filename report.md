@@ -225,7 +225,7 @@ value of all training_data columns and to use that to replace missing data field
 
 ## Splitting the data
 
-Now that we have the means to clean the data we can split the full dataset into training, validation and testing groups. We use an 80/10/10 split for this analysis.
+Now that we have a method for cleaning the data, we can split the full dataset into training, validation and testing groups. We use an 80/10/10 split for this analysis.
 
 ```clay
     // split into 80% train, 10% validation (early stopping), 10% test
@@ -496,7 +496,7 @@ Plot title("Permutation importance")
 
 ## What the network learned
 
-Finally, @fig-embed projects the test patients to two dimensions with PCA, coloured by outcome. On the left are the 8 standardized input features. On the right is the output of the last hidden layer, which is what the network hands to its output neuron. The hidden layer arranges the patients along the direction the network uses to decide: diabetic patients gather toward the left, negative patients toward the right. The overlap that remains in the middle in both panels reflects the limit of what these 8 measurements can say about diabetes.
+Finally, @fig-embed projects the test patients to two dimensions with PCA, colored by outcome. On the left are the 8 standardized input features. On the right is the output of the last hidden layer, which is what the network hands to its output neuron. The hidden layer arranges the patients along the direction the network uses to decide: diabetic patients gather toward the left, negative patients toward the right. The overlap that remains in the middle in both panels reflects the limit of what these 8 measurements can say about diabetes.
 
 ```{clay #fig-embed caption="PCA of the test patients: input features (left) and last hidden layer (right)."}
 embed_classes = y_test toArray map { |r| ((r at(0)) == 1) ifTrue { 1 } ifFalse { 0 } }
