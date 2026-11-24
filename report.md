@@ -233,7 +233,6 @@ The following network properties were used to configure the network:
         (correct * 1.0) / xs size
     }
 
-   // train on the training rows; the validation rows drive early stopping
     train = { |x_train, y_train, x_val, y_val|
         net validation(x_val, y_val)
         net train(x_train, y_train)
@@ -253,7 +252,7 @@ The following network properties were used to configure the network:
 
 As @fig-learn below shows, the training accuracy continues to show improvement. However, the validation accuracy levels out at around epoch 54. This is a clear indication of over-training and that the network is starting to memorize the training data.
 
-Displaying the learning requires just a few lines of code.
+Displaying the learning curve requires just a few lines of code.
 
 ```{clay #fig-learn caption="Learning curve."}
     history = net history
