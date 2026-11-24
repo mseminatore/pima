@@ -45,8 +45,9 @@ features = [
 
 feature_count = features length
 
-// cols where 0 means "missing": Glucose, BloodPressure, SkinThickness, Insulin, BMI.
-// 0 is a legitimate value for Pregnancies, and Pedigree/Age are never 0.
+// cols where 0 means "missing": Glucose, BloodPressure, SkinThickness, 
+// Insulin, and BMI. 0 is a legitimate value for Pregnancies, and 
+// Pedigree/Age are never 0.
 
 missingCols = [1, 2, 3, 4, 5]
 ```

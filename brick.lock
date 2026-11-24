@@ -4,7 +4,7 @@
     "ann": {
       "url": "github.com/mseminatore/clay-ann",
       "version": "latest",
-      "resolved": "5acb60588cd513922d963c8f50595a0da6634f4d"
+      "resolved": "1fc77a812190feaf1f16a6a75a5da779e3d922df"
     },
     "knit": {
       "url": "github.com/mseminatore/clay-knit",
