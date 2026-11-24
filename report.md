@@ -12,20 +12,20 @@ of diagnostic measuremewnts. Originally compiled by the National Institute of
 Diabetes and Digestive and Kidney Diseases (NIDDK), it contains data for **768** 
 female patients aged 21 and older of Pima Indian heritage living near Phoenix, Arizona. 
 
-The data for this report was sourced from 
-[Kaggle.com](https://www.kaggle.com/datasets/kumargh/pimaindiansdiabetescsv).
+>Note: The dataset for this analysis was sourced from 
+>[Kaggle.com](https://www.kaggle.com/datasets/kumargh/pimaindiansdiabetescsv).
 
 # Analysis Tools
 
-This analysis was conducted using a NN model written in the [Clay](https://github.com/mseminatore/clay) programming language. A prototype-based pure OO language.
+This analysis was conducted using a NN model written in the [Clay](https://github.com/mseminatore/clay) programming language. A prototype-based pure OO language sharing traits from Smalltalk and Io.
 
-A Clay brick (package) called [Clay-ann](https://github.com/mseminatore/clay-ann) provided the NN framework. Clay-ann is based on the C neural network library [libann](https://github.com/mseminatore/ann).
+A Clay "brick" (a package) called [Clay-ann](https://github.com/mseminatore/clay-ann) provided the NN framework. Clay-ann is a native code brick built on the C neural network library [libann](https://github.com/mseminatore/ann).
 
-The report itself was generated using the [Clay-knit](https://github.com/mseminatore/clay-knit) brick which itself uses the [Clay-pdf](https://github.com/mseminatore/clay-pdf) and [Clay-plot](https://github.com/mseminatore/clay-plot) bricks.
+The report itself was generated using the [Clay-knit](https://github.com/mseminatore/clay-knit) brick, which itself uses the [Clay-pdf](https://github.com/mseminatore/clay-pdf) and [Clay-plot](https://github.com/mseminatore/clay-plot) bricks.
 
-# Dataset
+# The Dataset
 
-The dataset describes the medical records for Pima Indians and whether or not each patient will have an onset of diabetes within five years.
+The Pima dataset describes the medical records for Pima Indians and whether or not each patient will have an onset of diabetes within five years.
 
 The data contains a total 8 features and one class variable (0: netagive and 1: positive for diabetes). The 8 features include:
 
@@ -33,13 +33,13 @@ The data contains a total 8 features and one class variable (0: netagive and 1: 
 import("ann")
 
     features = [
-        "Pregnancies",
-        "Glucose",
-        "BloodPressure",
-        "SkinThickness",
+        "Preg",
+        "Gluc",
+        "BP",
+        "Skin",
         "Insulin",
         "BMI",
-        "DiabetesPedigreeFunction",
+        "Pedigree",
         "Age"
     ]
 
@@ -79,7 +79,27 @@ The full dataset is stored in a single .csv file. The output class is the 9th co
 
 ## Cleaning the data
 
-There are a number of missing data entries. To analyze the data we need to either drop those rows (losing precious data) or replace the missing data.
+As @fig-zeros below shows, there are a number of missing data entries. 
+
+```{clay #fig-zeros caption="Number of 0 entries in each feature column."}
+rows = data toArray
+zeros = features map { |name| 0 }
+rows each { |row|
+    c = 0
+    { c < feature_count } whileTrue {
+        ((row at(c)) == 0) ifTrue { zeros setAt(c, (zeros at(c)) + 1) }
+        c = c + 1
+    }
+}
+
+Plot figure(#{figsize: [7, 3.5]})
+bars = Plot bar(features, zeros, #{color: "steelblue"})
+Plot barLabel(bars, #{fmt: "%d"})
+Plot ylabel("Rows with 0")
+Plot title("Zero entries by feature")
+```
+
+To analyze the data, we would either need to either drop those rows (losing precious data), or find some way to replace the missing data.
 
 Several helper functions were created to find the mean
 value of all training_data columns and to use that to replace missing data fields.
