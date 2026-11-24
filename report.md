@@ -17,11 +17,11 @@ female patients aged 21 and older of Pima Indian heritage living near Phoenix, A
 
 # Analysis Tools
 
-This analysis was conducted using a NN model written in the [Clay](https://github.com/mseminatore/clay) programming language. A prototype-based, pure Object-Oriented language that allows for rapid analysis of data. The language shares many traits with Smalltalk and Io.
+This analysis was conducted using a NN model written in the [Clay](https://github.com/mseminatore/clay) programming language. Clay is a new prototype-based, pure Object-Oriented language. It runs interpretively like Python and thus allows for rapid analysis of data. Like Python, it has a growing collection of packages (called bricks) that are useful for data analysis. The Clay language shares many traits with Smalltalk and Io.
 
 A Clay "brick" (a package) called [Clay-ann](https://github.com/mseminatore/clay-ann) provided the NN framework. Clay-ann is a native code brick built on the C neural network library [libann](https://github.com/mseminatore/ann).
 
-The report itself was generated using the [Clay-knit](https://github.com/mseminatore/clay-knit) brick, which itself uses the [Clay-pdf](https://github.com/mseminatore/clay-pdf) and [Clay-plot](https://github.com/mseminatore/clay-plot) bricks.
+This report was generated using the [Clay-knit](https://github.com/mseminatore/clay-knit) brick, which itself uses the [Clay-pdf](https://github.com/mseminatore/clay-pdf) and [Clay-plot](https://github.com/mseminatore/clay-plot) bricks. `Knitting` reports is a concept inspired by the R programming language where a markdown file contains snippets of code that are intermixed with text narrative. The code is executed in chunks with the output visible and available for generating inline tables and figures.
 
 # The Dataset
 
@@ -32,74 +32,79 @@ The data contains a total 8 features and one class variable (0: negative and 1: 
 ```clay
 import("ann")
 
-    features = [
-        "Preg",
-        "Gluc",
-        "BP",
-        "Skin",
-        "Insulin",
-        "BMI",
-        "Pedigree",
-        "Age"
-    ]
+features = [
+    "Preg",
+    "Gluc",
+    "BP",
+    "Skin",
+    "Insulin",
+    "BMI",
+    "Pedigree",
+    "Age"
+]
 
-    feature_count = features length
+feature_count = features length
 
-    // columns where 0 means "missing": Glucose, BloodPressure, SkinThickness, Insulin, BMI.
-    // 0 is a legitimate value for Pregnancies, and Pedigree/Age are never 0.
+// cols where 0 means "missing": Glucose, BloodPressure, SkinThickness, Insulin, BMI.
+// 0 is a legitimate value for Pregnancies, and Pedigree/Age are never 0.
 
-    missingCols = [1, 2, 3, 4, 5]
+missingCols = [1, 2, 3, 4, 5]
 ```
 
-The units and detailed descriptions of these features are shown in @tbl-features. Of these, only number of pregnancies can validly be `0`. For all others, a `0` value marks missing data.
+The units and detailed descriptions of these features are shown in @tbl-features. Of these, only the number of pregnancies can validly be `0`. For all others, a `0` value marks missing data.
 
 | Col | Name | Description |
 |-----|------|-------------|
 |1| preg | Number of times pregnant |
-|2| plas | Plasma glucose concentration a 2 hours in an oral glucose tolerance test |
-|3| pres | Diastolic blood pressure (mm Hg) |
+|2| gluc | Plasma glucose concentration a 2 hours in an oral glucose tolerance test |
+|3| BP | Diastolic blood pressure (mm Hg) |
 |4| skin | Triceps skin fold thickness (mm) |
 |5| test | 2-Hour serum insulin (mu U/ml) |
-|6| mass | Body mass index (weight in kg/(height in m)^2) |
+|6| BMI | Body mass index (weight in kg/(height in m)^2) |
 |7| pedi | Diabetes pedigree function |
 |8| age | Age (years) |
 Table: Feature labels. {#tbl-features}
 
 ## Loading the data
 
-The complete dataset is stored in a single .csv file of about 23 KBytes. Feature data is in the first 8 columns. The output class is the 9th column.
+The complete dataset is small and is stored in a single .csv file of about 23 KBytes. Feature data is in the first 8 columns. The output class is the 9th column.
 
 ```clay
     // load the Pima dataset
     "Loading Pima dataset..." println
     data = Ann loadCsv("data/pima-indians-diabetes.csv")
+
     feature_count = features length
     "Data loaded with ${data cols} cols and ${data rows} rows" println
 ```
 
-The two classes are not evenly split. @fig-balance shows 500 negative and 268 positive patients, so a model that always predicted "no diabetes" would already be right about 65% of the time. Accuracy should be judged against that baseline.
+The first thing to note from the data is that the two output classes are not evenly balanced. As @fig-balance shows, there are 500 negative and 268 positive patients. Therefore, a model that always predicted "no diabetes" would already be right about 65% of the time. As a result, the final accuracy should be judged against that baseline.
 
 ```{clay #fig-balance caption="Number of patients in each class."}
 class_counts = [0, 0]
+
 data toArray each { |row|
-    // the label loads as a float (1.0), so compare it rather than using it as an index
+    // label loads as a float (1.0), so compare it rather than using it as an index
     k = ((row at(feature_count)) == 1) ifTrue { 1 } ifFalse { 0 }
     class_counts setAt(k, (class_counts at(k)) + 1)
 }
+
 Plot figure(#{figsize: [4, 3.5]})
 class_bars = Plot bar(["No diabetes", "Diabetes"], class_counts, #{color: ["steelblue", "tomato"]})
+
 Plot barLabel(class_bars, #{fmt: "%d"})
 Plot ylabel("Patients")
-Plot title("Class balance")
+Plot title("Classes are not balanced")
 ```
 
 ## Cleaning the data
 
-As @fig-zeros below clearly shows, there are a number of missing data entries. Insulin
+As @fig-zeros below clearly demonstrates, there are a number of missing data entries. These missing entries must be dealt with before training to avoid skewing the results.
 
 ```{clay #fig-zeros caption="Number of 0 entries in each feature column."}
 rows = data toArray
 zeros = features map { |name| 0 }
+
 rows each { |row|
     c = 0
     { c < feature_count } whileTrue {
@@ -115,11 +120,14 @@ Plot ylabel("Rows with 0")
 Plot title("Missing data by feature")
 ```
 
+The Insulin column is missing the most data with `{clay} zeros at(features indexOf("Insulin"))` empty rows. That represents `{clay} (zeros at(4)) / (data rows)`% of all rows.
+
 The distribution of each feature (raw, before cleaning) is shown in @fig-hist. The spikes at 0 in Glucose, BloodPressure, SkinThickness, Insulin and BMI are the missing values.
 
 ```{clay #fig-hist caption="Distribution of each feature before cleaning."}
 hist_rows = data toArray
 [hist_fig, hist_axs] = Plot subplots(2, 4, #{figsize: [9, 4.5]})
+
 i = 0
 { i < feature_count } whileTrue {
     hist_r = (i >= 4) ifTrue { 1 } ifFalse { 0 }
@@ -136,6 +144,7 @@ Splitting the same distributions by outcome, in @fig-byclass, shows which featur
 
 ```{clay #fig-byclass caption="Feature distributions by outcome (missing values excluded)."}
 [cls_fig, cls_axs] = Plot subplots(2, 4, #{figsize: [9, 4.5]})
+
 i = 0
 { i < feature_count } whileTrue {
     cls_r = (i >= 4) ifTrue { 1 } ifFalse { 0 }
@@ -144,12 +153,14 @@ i = 0
     cls_neg = []
     cls_pos = []
     cls_missing = missingCols contains(i)
+
     hist_rows each { |row|
         v = row at(i)
         ((v != 0) || (cls_missing == false)) ifTrue {
             ((row at(feature_count)) == 1) ifTrue { cls_pos push(v) } ifFalse { cls_neg push(v) }
         }
     }
+
     cls_ax hist(cls_neg, 15, #{color: "steelblue", alpha: 0.6, label: "No diabetes"})
     cls_ax hist(cls_pos, 15, #{color: "tomato", alpha: 0.6, label: "Diabetes"})
     cls_ax title(features at(i), #{fontsize: 9})
@@ -166,8 +177,8 @@ Several helper functions were created to find the mean
 value of all training_data columns and to use that to replace missing data fields.
 
 ```clay
-    // mean of the non-zero values in each column. Fitted on the training data only, so nothing
-    // leaks in from the validation/test sets.
+    // mean of the non-zero values in each column. Fitted on the training data only,
+    // so nothing leaks in from the validation/test sets.
     imputeMeans = { |train_data|
         rows = train_data toArray
         means = []
@@ -182,6 +193,9 @@ value of all training_data columns and to use that to replace missing data field
             means push((n > 0) ifTrue { sum / n } ifFalse { 0 })
             c = c + 1
         }
+
+        "Column avgs: ${means}" println
+
         means
     }
 
@@ -196,9 +210,11 @@ value of all training_data columns and to use that to replace missing data field
         AnnData fromArray(rows)
     }
 
-    // z-score the feature columns: (x - mean) / std. The label column is left untouched.
+    // z-score the feature columns: (x - mean) / std. 
+    // The label column is left untouched.
     standardize = { |data, means, stds|
         rows = data toArray
+
         rows each { |row|
             c = 0
             { c < feature_count } whileTrue {
@@ -206,10 +222,12 @@ value of all training_data columns and to use that to replace missing data field
                 c = c + 1
             }
         }
+        
         AnnData fromArray(rows)
     }
 
-    // impute and standardize every split using statistics from the training split only
+    // impute and standardize every split using statistics from the 
+    // training split only
     clean = { |train_data, val_data, test_data|
         "Cleaning data (impute 0s, standardize)..." println
         means = imputeMeans(train_data)
@@ -261,6 +279,7 @@ corr_count = corr_rows size
 
 corr_mean = []
 corr_sd = []
+
 a = 0
 { a < corr_n } whileTrue {
     total = 0
@@ -268,12 +287,14 @@ a = 0
     { r < corr_count } whileTrue { total = total + ((corr_rows at(r)) at(a)); r = r + 1 }
     m = total / corr_count
     ss = 0
+
     r = 0
     { r < corr_count } whileTrue {
         d = ((corr_rows at(r)) at(a)) - m
         ss = ss + d * d
         r = r + 1
     }
+    
     corr_mean push(m)
     corr_sd push(Math sqrt(ss / corr_count))
     a = a + 1
@@ -283,6 +304,7 @@ corr_matrix = []
 a = 0
 { a < corr_n } whileTrue {
     line = []
+
     b = 0
     { b < corr_n } whileTrue {
         cov = 0
@@ -294,6 +316,7 @@ a = 0
         line push((cov / corr_count) / ((corr_sd at(a)) * (corr_sd at(b))))
         b = b + 1
     }
+
     corr_matrix push(line)
     a = a + 1
 }
@@ -303,8 +326,10 @@ corr_image = Plot imshow(corr_matrix, #{cmap: "coolwarm", vmin: -1, vmax: 1})
 Plot colorbar(corr_image, #{label: "Pearson r"})
 Plot xticks([0, 1, 2, 3, 4, 5, 6, 7, 8], corr_names, #{rotation: 45})
 Plot yticks([0, 1, 2, 3, 4, 5, 6, 7, 8], corr_names)
+
 a = 0
 { a < corr_n } whileTrue {
+
     b = 0
     { b < corr_n } whileTrue {
         Plot text(b, a, (Math round((corr_matrix at(a) at(b)) * 100) / 100.0) toString, #{ha: "center", va: "center", fontsize: 7})
@@ -312,6 +337,7 @@ a = 0
     }
     a = a + 1
 }
+
 Plot title("Feature correlations")
 ```
 
@@ -319,15 +345,18 @@ Plot title("Feature correlations")
 
 Given the 8 input features and 1 output class, and a presumption that the problem was linear-logistic, a simple dense network model was chosen. Since this is a single class output predictor, the loss function was set to `cross_entropy`, which `libann` treats as `Binary Cross Entropy`.
 
-Recall that the loss function for Binary Cross Entropy is:
+For reference, the loss function for Binary Cross Entropy is:
 
 $$BCE = -\frac{1}{N} \sum_{i=1}^{N} [ y_i \log(p_i) + (1 - y_i) \log(1 - p_i) ]$$
 
 ## Model details
 
-The dataset is not large, or overly complicated. So a deep NN is not required, and only a few hidden layers will be used. The total parameter count is modest and the model trains very quickly.
+The dataset is not large, or particularly complex. Thus, a deep NN is not necessary, and only a few small hidden layers will be used. Note that it is likely that an even smaller model may converge as well or better due to the possibility of over-fitting such a small dataset.
 
-The following properties were used to configure the network model:
+> In general the number of parameters in a model should be smaller than the dataset
+> size to avoid over-training and to force generalized learning.
+
+The total parameter count is modest and the model trains very quickly. The following properties were used to configure the network model:
 
 - Validation data with `EarlyStopping` with a `patience` of 10 epochs
 - The `Adam` optimizer with the default learning rate of 0.001
@@ -340,6 +369,7 @@ The following properties were used to configure the network model:
     net dense(feature_count * 2, "relu")
     net dense(feature_count, "relu")
     net output(1, "sigmoid")
+
     net summary println
 ```
 
@@ -373,6 +403,8 @@ Having cleaned the data and defined our network model it is time to train agains
     train(x_train, y_train, x_val, y_val)
 
     // report results
+    "Training completed" println
+    "------------------" println
     "Training accuracy:   ${accuracy(x_train, y_train) * 100}%" println
     "Validation accuracy: ${accuracy(x_val, y_val) * 100}%" println
     "Test accuracy:       ${accuracy(x_test, y_test) * 100}%" println
@@ -387,13 +419,14 @@ Displaying the learning curve to evaluate training progress requires just a few 
 
 ```{clay #fig-learn caption="Learning curve."}
     history = net history
+
     Plot learningCurve(history)
     Plot title("Learning curve")
 ```
 
 # Results
 
-The test split (10% of the rows) was held out of both training and early stopping, so the figures below are an honest estimate of how the model performs on unseen patients. The network's output is a probability, thresholded at 0.5 to make a prediction.
+The test split (10% of the total rows) was held out of both training and early stopping, so the figures below are an honest estimate of how the model performs on unseen patients. The network's output is a probability, thresholded at 0.5 to make a prediction.
 
 ## Confusion matrix
 
@@ -407,6 +440,7 @@ tn = 0
 fp = 0
 fn = 0
 tp = 0
+
 k = 0
 { k < test_probs size } whileTrue {
     guess = (((test_probs at(k)) at(0)) >= 0.5) ifTrue { 1 } ifFalse { 0 }

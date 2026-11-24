@@ -9,18 +9,18 @@
     "knit": {
       "url": "github.com/mseminatore/clay-knit",
       "version": "latest",
-      "resolved": "283e690a618bdd9e453e4bd9d919f52b5fc163f1"
+      "resolved": "f12754b3de93f1766e6b1ea7f1f7031b78a993ee"
     },
     "plot": {
-      "url": "github.com/mseminatore/clay-plot@v0.8.0",
-      "version": "v0.8.0",
-      "resolved": "353c5278d36af4d935cec7b1608e05655745fa7c",
+      "url": "github.com/mseminatore/clay-plot@v0.9.2",
+      "version": "v0.9.2",
+      "resolved": "4c5429580ec370ae946b185d4d49770f460f763f",
       "dependency_of": "knit"
     },
     "pdf": {
-      "url": "github.com/mseminatore/clay-pdf@v0.3.0",
-      "version": "v0.3.0",
-      "resolved": "c9da48bb49672558b227aa7f7b1ac7a70f7e0dd0",
+      "url": "github.com/mseminatore/clay-pdf@v0.3.2",
+      "version": "v0.3.2",
+      "resolved": "12b81f43e74743385ea1b4628484f972adc9feb0",
       "dependency_of": "knit"
     },
     "image": {
