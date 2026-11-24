@@ -67,7 +67,7 @@ Table: Feature labels. {#tbl-features}
 
 ## Loading the data
 
-The full dataset is stored in a single .csv file. The output class is the 9th column.
+The complete dataset is stored in a single .csv file of about 23 KBytes. Feature data is in the first 8 columns. The output class is the 9th column.
 
 ```clay
     // load the Pima dataset
@@ -317,15 +317,17 @@ Plot title("Feature correlations")
 
 # Model
 
-Given the 8 input features and 1 output class, and a presumption that the problem was linear-logistic, a simple dense network model was chosen. Since this is a single class output predictor the loss function was set to `cross_entropy` which `libann` treats as `Binary Cross Entropy`.
+Given the 8 input features and 1 output class, and a presumption that the problem was linear-logistic, a simple dense network model was chosen. Since this is a single class output predictor, the loss function was set to `cross_entropy`, which `libann` treats as `Binary Cross Entropy`.
 
 Recall that the loss function for Binary Cross Entropy is:
 
-$BCE = -\frac{1}{N} \sum_{i=1}^{N} [ y_i \log(p_i) + (1 - y_i) \log(1 - p_i) ]$
+$$BCE = -\frac{1}{N} \sum_{i=1}^{N} [ y_i \log(p_i) + (1 - y_i) \log(1 - p_i) ]$$
 
 ## Model details
 
-The following network properties were used to configure the network:
+The dataset is not large, or overly complicated. So a deep NN is not required, and only a few hidden layers will be used. The total parameter count is modest and the model trains very quickly.
+
+The following properties were used to configure the network model:
 
 - Validation data with `EarlyStopping` with a `patience` of 10 epochs
 - The `Adam` optimizer with the default learning rate of 0.001
@@ -342,6 +344,8 @@ The following network properties were used to configure the network:
 ```
 
 ## Training
+
+Having cleaned the data and defined our network model it is time to train against the data. We use validation data to determine how well the model performs against data it has not seen. This also enables early stopping when validation loss fails to improve.
 
 ```clay
     // fraction of rows classified correctly, thresholding the sigmoid output at 0.5.
