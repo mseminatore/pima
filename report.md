@@ -1,14 +1,14 @@
 ---
-title: "Analysis of Pima Indian Diabetes Dataset"
+title: "An Analysis of the Pima Indian Diabetes Dataset"
 author: Mark Seminatore
 date: `{clay} Date now format("%m-%d-%Y")`
 ---
 
 # Introduction
 
-The is a report summarizing an analysis of the benchmark machine learning
+Thiss a report summarizing a data analysis conducted on the benchmark machine learning
 dataset used to predict whether a patient has diabetes based on a collection
-of diagnostic measuremewnts. Originally compiled by the National Institute of 
+of diagnostic measurements. Originally compiled by the National Institute of 
 Diabetes and Digestive and Kidney Diseases (NIDDK), it contains data for **768** 
 female patients aged 21 and older of Pima Indian heritage living near Phoenix, Arizona. 
 
@@ -17,7 +17,7 @@ female patients aged 21 and older of Pima Indian heritage living near Phoenix, A
 
 # Analysis Tools
 
-This analysis was conducted using a NN model written in the [Clay](https://github.com/mseminatore/clay) programming language. A prototype-based pure OO language sharing traits from Smalltalk and Io.
+This analysis was conducted using a NN model written in the [Clay](https://github.com/mseminatore/clay) programming language. A prototype-based, pure Object-Oriented language that allows for rapid analysis of data. The language shares many traits with Smalltalk and Io.
 
 A Clay "brick" (a package) called [Clay-ann](https://github.com/mseminatore/clay-ann) provided the NN framework. Clay-ann is a native code brick built on the C neural network library [libann](https://github.com/mseminatore/ann).
 
@@ -25,9 +25,9 @@ The report itself was generated using the [Clay-knit](https://github.com/msemina
 
 # The Dataset
 
-The Pima dataset describes the medical records for Pima Indians and whether or not each patient will have an onset of diabetes within five years.
+The Pima dataset describes the medical records for a sampling of Pima Indians. In addition to a number of featuresand whether or not each patient will have an onset of diabetes within five years.
 
-The data contains a total 8 features and one class variable (0: netagive and 1: positive for diabetes). The 8 features include:
+The data contains a total 8 features and one class variable (0: negative and 1: positive for diabetes). The 8 features provided in the dataset include:
 
 ```clay
 import("ann")
@@ -95,7 +95,7 @@ Plot title("Class balance")
 
 ## Cleaning the data
 
-As @fig-zeros below shows, there are a number of missing data entries. 
+As @fig-zeros below clearly shows, there are a number of missing data entries. Insulin
 
 ```{clay #fig-zeros caption="Number of 0 entries in each feature column."}
 rows = data toArray
@@ -112,7 +112,7 @@ Plot figure(#{figsize: [7, 3.5]})
 bars = Plot bar(features, zeros, #{color: "steelblue"})
 Plot barLabel(bars, #{fmt: "%d"})
 Plot ylabel("Rows with 0")
-Plot title("Zero entries by feature")
+Plot title("Missing data by feature")
 ```
 
 The distribution of each feature (raw, before cleaning) is shown in @fig-hist. The spikes at 0 in Glucose, BloodPressure, SkinThickness, Insulin and BMI are the missing values.
@@ -132,7 +132,35 @@ i = 0
 }
 ```
 
-To analyze the data, we would either need to either drop those rows (losing precious data), or find some way to replace the missing data.
+Splitting the same distributions by outcome, in @fig-byclass, shows which features actually separate the two groups (the missing-value zeros are left out here). Glucose, and to a lesser degree BMI and Age, shift clearly to the right for diabetic patients, while BloodPressure and SkinThickness barely differ.
+
+```{clay #fig-byclass caption="Feature distributions by outcome (missing values excluded)."}
+[cls_fig, cls_axs] = Plot subplots(2, 4, #{figsize: [9, 4.5]})
+i = 0
+{ i < feature_count } whileTrue {
+    cls_r = (i >= 4) ifTrue { 1 } ifFalse { 0 }
+    cls_c = i - 4 * cls_r
+    cls_ax = (cls_axs at(cls_r)) at(cls_c)
+    cls_neg = []
+    cls_pos = []
+    cls_missing = missingCols contains(i)
+    hist_rows each { |row|
+        v = row at(i)
+        ((v != 0) || (cls_missing == false)) ifTrue {
+            ((row at(feature_count)) == 1) ifTrue { cls_pos push(v) } ifFalse { cls_neg push(v) }
+        }
+    }
+    cls_ax hist(cls_neg, 15, #{color: "steelblue", alpha: 0.6, label: "No diabetes"})
+    cls_ax hist(cls_pos, 15, #{color: "tomato", alpha: 0.6, label: "Diabetes"})
+    cls_ax title(features at(i), #{fontsize: 9})
+    (i == 0) ifTrue { cls_ax legend(#{fontsize: 7}) }
+    i = i + 1
+}
+```
+
+To analyze the dataset, given many missing values, we either need to either drop those rows (losing precious data from such a small dataset), or better, find some way to replace the missing data.
+
+One way to replace, or impute, missing data is to fill empty data columns with the column mean or median. This analysis selected mean.
 
 Several helper functions were created to find the mean
 value of all training_data columns and to use that to replace missing data fields.
@@ -400,4 +428,83 @@ test_labels = test_truth map { |r| r at(0) }
 
 Plot figure(#{figsize: [5, 4.5]})
 roc_result = Plot roc(test_scores, test_labels, #{chance: true, title: "ROC curve"})
+```
+
+## Predicted probabilities
+
+@fig-probs splits the test predictions by true outcome. A good model pushes the two groups to opposite ends; the overlap in the middle is where the errors come from, and it is why moving the threshold away from 0.5 trades false negatives for false positives.
+
+```{clay #fig-probs caption="Predicted probability of diabetes on the test split, by true outcome."}
+probs_neg = []
+probs_pos = []
+k = 0
+{ k < test_scores size } whileTrue {
+    ((test_labels at(k)) == 1) ifTrue { probs_pos push(test_scores at(k)) } ifFalse { probs_neg push(test_scores at(k)) }
+    k = k + 1
+}
+Plot figure(#{figsize: [6, 3.5]})
+Plot hist(probs_neg, 10, #{range: [0, 1], color: "steelblue", alpha: 0.6, label: "No diabetes"})
+Plot hist(probs_pos, 10, #{range: [0, 1], color: "tomato", alpha: 0.6, label: "Diabetes"})
+Plot axvline(0.5, #{color: "gray", linestyle: "--"})
+Plot xlabel("Predicted probability")
+Plot ylabel("Patients")
+Plot legend
+Plot title("Predicted probabilities")
+```
+
+## Feature importance
+
+Which inputs does the network actually rely on? @fig-importance measures it by permutation: each feature's column in the test split is shifted against the outcomes, breaking its link with them, and the drop in accuracy is recorded (averaged over four different shifts). A bigger drop means the model leans on that feature more. A bar near zero or slightly negative means the model does not use the feature. With only 77 test patients, small differences like these are noise (a shuffle can happen to help by chance), so read the large bars, not the small ones: Glucose and Pregnancies stand out.
+
+```{clay #fig-importance caption="Permutation importance: accuracy lost when a feature is shuffled (test split)."}
+imp_rows = x_test toArray
+imp_n = imp_rows size
+imp_base = accuracy(x_test, y_test)
+imp_shifts = [7, 19, 31, 43]
+
+imp_drops = []
+f = 0
+{ f < feature_count } whileTrue {
+    total = 0
+    s = 0
+    { s < imp_shifts size } whileTrue {
+        shifted = []
+        r = 0
+        { r < imp_n } whileTrue {
+            row = []
+            c = 0
+            { c < feature_count } whileTrue {
+                src = (c == f) ifTrue { (r + (imp_shifts at(s))) % imp_n } ifFalse { r }
+                row push((imp_rows at(src)) at(c))
+                c = c + 1
+            }
+            shifted push(row)
+            r = r + 1
+        }
+        total = total + (imp_base - accuracy(AnnData fromArray(shifted), y_test))
+        s = s + 1
+    }
+    imp_drops push(total / imp_shifts size)
+    f = f + 1
+}
+
+Plot figure(#{figsize: [6, 4]})
+Plot barh(features, imp_drops, #{color: "steelblue"})
+Plot xlabel("Drop in accuracy")
+Plot title("Permutation importance")
+```
+
+## What the network learned
+
+Finally, @fig-embed projects the test patients to two dimensions with PCA, coloured by outcome. On the left are the 8 standardized input features. On the right is the output of the last hidden layer, which is what the network hands to its output neuron. The hidden layer arranges the patients along the direction the network uses to decide: diabetic patients gather toward the left, negative patients toward the right. The overlap that remains in the middle in both panels reflects the limit of what these 8 measurements can say about diabetes.
+
+```{clay #fig-embed caption="PCA of the test patients: input features (left) and last hidden layer (right)."}
+embed_classes = y_test toArray map { |r| ((r at(0)) == 1) ifTrue { 1 } ifFalse { 0 } }
+embed_hidden = (net activations(x_test, -2)) toArray
+
+[embed_fig, embed_axs] = Plot subplots(1, 2, #{figsize: [9, 4]})
+embed_axs at(0) embedding(x_test toArray, embed_classes, #{classNames: ["No diabetes", "Diabetes"], s: 14, alpha: 0.7})
+embed_axs at(0) title("Input features")
+embed_axs at(1) embedding(embed_hidden, embed_classes, #{classNames: ["No diabetes", "Diabetes"], s: 14, alpha: 0.7})
+embed_axs at(1) title("Last hidden layer")
 ```
