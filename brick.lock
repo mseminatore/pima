@@ -1,0 +1,33 @@
+{
+  "lockfile_version": 1,
+  "locked": {
+    "ann": {
+      "url": "github.com/mseminatore/clay-ann",
+      "version": "latest",
+      "resolved": "5acb60588cd513922d963c8f50595a0da6634f4d"
+    },
+    "knit": {
+      "url": "github.com/mseminatore/clay-knit",
+      "version": "latest",
+      "resolved": "283e690a618bdd9e453e4bd9d919f52b5fc163f1"
+    },
+    "plot": {
+      "url": "github.com/mseminatore/clay-plot@v0.8.0",
+      "version": "v0.8.0",
+      "resolved": "353c5278d36af4d935cec7b1608e05655745fa7c",
+      "dependency_of": "knit"
+    },
+    "pdf": {
+      "url": "github.com/mseminatore/clay-pdf@v0.3.0",
+      "version": "v0.3.0",
+      "resolved": "c9da48bb49672558b227aa7f7b1ac7a70f7e0dd0",
+      "dependency_of": "knit"
+    },
+    "image": {
+      "url": "github.com/mseminatore/clay-image@v0.4.0",
+      "version": "v0.4.0",
+      "resolved": "636081f0356ad3304a5399cd7520a0be3366648f",
+      "dependency_of": "plot"
+    }
+  }
+}
