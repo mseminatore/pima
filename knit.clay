@@ -1,0 +1,12 @@
+// Knits a report: clay examples/knit.clay [report.md] [--html]   (from the brick's folder)
+// --html writes a web page, with interactive figures, instead of a PDF
+import("knit")
+
+args = System args
+
+html = args contains("--html")
+rest = args filter { |a| a != "--html" }
+
+path = (rest size > 0) ifTrue { rest at(0) } ifFalse { "report.md" }
+
+("wrote " + (Knit render(path, #{format: html ifTrue { "html" } ifFalse { "pdf" }}))) println
