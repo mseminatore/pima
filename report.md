@@ -77,6 +77,22 @@ The full dataset is stored in a single .csv file. The output class is the 9th co
     "Data loaded with ${data cols} cols and ${data rows} rows" println
 ```
 
+The two classes are not evenly split. @fig-balance shows 500 negative and 268 positive patients, so a model that always predicted "no diabetes" would already be right about 65% of the time. Accuracy should be judged against that baseline.
+
+```{clay #fig-balance caption="Number of patients in each class."}
+class_counts = [0, 0]
+data toArray each { |row|
+    // the label loads as a float (1.0), so compare it rather than using it as an index
+    k = ((row at(feature_count)) == 1) ifTrue { 1 } ifFalse { 0 }
+    class_counts setAt(k, (class_counts at(k)) + 1)
+}
+Plot figure(#{figsize: [4, 3.5]})
+class_bars = Plot bar(["No diabetes", "Diabetes"], class_counts, #{color: ["steelblue", "tomato"]})
+Plot barLabel(class_bars, #{fmt: "%d"})
+Plot ylabel("Patients")
+Plot title("Class balance")
+```
+
 ## Cleaning the data
 
 As @fig-zeros below shows, there are a number of missing data entries. 
@@ -97,6 +113,23 @@ bars = Plot bar(features, zeros, #{color: "steelblue"})
 Plot barLabel(bars, #{fmt: "%d"})
 Plot ylabel("Rows with 0")
 Plot title("Zero entries by feature")
+```
+
+The distribution of each feature (raw, before cleaning) is shown in @fig-hist. The spikes at 0 in Glucose, BloodPressure, SkinThickness, Insulin and BMI are the missing values.
+
+```{clay #fig-hist caption="Distribution of each feature before cleaning."}
+hist_rows = data toArray
+[hist_fig, hist_axs] = Plot subplots(2, 4, #{figsize: [9, 4.5]})
+i = 0
+{ i < feature_count } whileTrue {
+    hist_r = (i >= 4) ifTrue { 1 } ifFalse { 0 }
+    hist_c = i - 4 * hist_r
+    hist_ax = (hist_axs at(hist_r)) at(hist_c)
+    hist_vals = hist_rows map { |row| row at(i) }
+    hist_ax hist(hist_vals, 20, #{color: "steelblue"})
+    hist_ax title(features at(i), #{fontsize: 9})
+    i = i + 1
+}
 ```
 
 To analyze the data, we would either need to either drop those rows (losing precious data), or find some way to replace the missing data.
@@ -188,13 +221,79 @@ Now that we have the means to clean the data we can split the full dataset into 
 
 ```
 
+## Feature correlations
+
+Before modelling, it helps to see how the features relate to each other and to the outcome. @fig-corr shows the Pearson correlation of every pair of columns in the cleaned training data (the last row and column is the diabetes outcome). Glucose has by far the strongest link with the outcome, and several features move together (age and pregnancies, skin thickness and BMI).
+
+```{clay #fig-corr caption="Correlation matrix of the features and the outcome (training split)."}
+corr_names = features + ["Outcome"]
+corr_rows = train_data toArray
+corr_n = corr_names size
+corr_count = corr_rows size
+
+corr_mean = []
+corr_sd = []
+a = 0
+{ a < corr_n } whileTrue {
+    total = 0
+    r = 0
+    { r < corr_count } whileTrue { total = total + ((corr_rows at(r)) at(a)); r = r + 1 }
+    m = total / corr_count
+    ss = 0
+    r = 0
+    { r < corr_count } whileTrue {
+        d = ((corr_rows at(r)) at(a)) - m
+        ss = ss + d * d
+        r = r + 1
+    }
+    corr_mean push(m)
+    corr_sd push(Math sqrt(ss / corr_count))
+    a = a + 1
+}
+
+corr_matrix = []
+a = 0
+{ a < corr_n } whileTrue {
+    line = []
+    b = 0
+    { b < corr_n } whileTrue {
+        cov = 0
+        r = 0
+        { r < corr_count } whileTrue {
+            cov = cov + (((corr_rows at(r)) at(a)) - (corr_mean at(a))) * (((corr_rows at(r)) at(b)) - (corr_mean at(b)))
+            r = r + 1
+        }
+        line push((cov / corr_count) / ((corr_sd at(a)) * (corr_sd at(b))))
+        b = b + 1
+    }
+    corr_matrix push(line)
+    a = a + 1
+}
+
+Plot figure(#{figsize: [7, 6]})
+corr_image = Plot imshow(corr_matrix, #{cmap: "coolwarm", vmin: -1, vmax: 1})
+Plot colorbar(corr_image, #{label: "Pearson r"})
+Plot xticks([0, 1, 2, 3, 4, 5, 6, 7, 8], corr_names, #{rotation: 45})
+Plot yticks([0, 1, 2, 3, 4, 5, 6, 7, 8], corr_names)
+a = 0
+{ a < corr_n } whileTrue {
+    b = 0
+    { b < corr_n } whileTrue {
+        Plot text(b, a, (Math round((corr_matrix at(a) at(b)) * 100) / 100.0) toString, #{ha: "center", va: "center", fontsize: 7})
+        b = b + 1
+    }
+    a = a + 1
+}
+Plot title("Feature correlations")
+```
+
 # Model
 
 Given the 8 input features and 1 output class, and a presumption that the problem was linear-logistic, a simple dense network model was chosen. Since this is a single class output predictor the loss function was set to `cross_entropy` which `libann` treats as `Binary Cross Entropy`.
 
 Recall that the loss function for Binary Cross Entropy is:
 
-$BCE = -\frac{1}{N} \sum_{i=1}^{N} [y_i \log(p_i) + (1 - y_i)\log(1 - p_i)]$
+$BCE = -\frac{1}{N} \sum_{i=1}^{N} [ y_i \log(p_i) + (1 - y_i) \log(1 - p_i) ]$
 
 ## Model details
 
@@ -250,7 +349,7 @@ The following network properties were used to configure the network:
 
 ## Learning curve
 
-As @fig-learn below shows, the training accuracy continues to show improvement. However, the validation accuracy levels out at around epoch 54. This is a clear indication of over-training and that the network is starting to memorize the training data.
+As @fig-learn below shows, the training loss continues to show improvement. However, the validation loss levels out at around epoch 54. This is a clear indication of over-training and that the network is starting to memorize the training data.
 
 Displaying the learning curve requires just a few lines of code.
 
@@ -258,4 +357,47 @@ Displaying the learning curve requires just a few lines of code.
     history = net history
     Plot learningCurve(history)
     Plot title("Learning curve")
+```
+
+# Results
+
+The test split (10% of the rows) was held out of both training and early stopping, so the figures below are an honest estimate of how the model performs on unseen patients. The network's output is a probability, thresholded at 0.5 to make a prediction.
+
+## Confusion matrix
+
+@fig-confusion counts the test predictions against the true outcomes. For a screening task like this, the false negatives (diabetic patients the model misses, bottom left) matter more than the raw accuracy.
+
+```{clay #fig-confusion caption="Confusion matrix on the test split (rows: actual, columns: predicted)."}
+test_probs = (net predictBatch(x_test)) toArray
+test_truth = y_test toArray
+
+tn = 0
+fp = 0
+fn = 0
+tp = 0
+k = 0
+{ k < test_probs size } whileTrue {
+    guess = (((test_probs at(k)) at(0)) >= 0.5) ifTrue { 1 } ifFalse { 0 }
+    actual = (test_truth at(k)) at(0)
+    ((actual == 0) && (guess == 0)) ifTrue { tn = tn + 1 }
+    ((actual == 0) && (guess == 1)) ifTrue { fp = fp + 1 }
+    ((actual == 1) && (guess == 0)) ifTrue { fn = fn + 1 }
+    ((actual == 1) && (guess == 1)) ifTrue { tp = tp + 1 }
+    k = k + 1
+}
+
+Plot figure(#{figsize: [4.5, 4]})
+Plot confusionMatrix([[tn, fp], [fn, tp]], #{labels: ["No diabetes", "Diabetes"], title: "Test set"})
+```
+
+## ROC curve
+
+The confusion matrix depends on the 0.5 threshold. The ROC curve in @fig-roc shows the trade-off between true and false positives at every threshold, and the area under it (AUC) summarizes the model's ability to rank positive patients above negative ones: 0.5 is chance, 1.0 is perfect.
+
+```{clay #fig-roc caption="ROC curve on the test split."}
+test_scores = test_probs map { |p| p at(0) }
+test_labels = test_truth map { |r| r at(0) }
+
+Plot figure(#{figsize: [5, 4.5]})
+roc_result = Plot roc(test_scores, test_labels, #{chance: true, title: "ROC curve"})
 ```
