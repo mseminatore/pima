@@ -4,17 +4,17 @@
     "ann": {
       "url": "github.com/mseminatore/clay-ann",
       "version": "latest",
-      "resolved": "1fc77a812190feaf1f16a6a75a5da779e3d922df"
+      "resolved": "d6eed66c2cfe54ca232f293329e5205409c2fff7"
     },
     "knit": {
       "url": "github.com/mseminatore/clay-knit",
       "version": "latest",
-      "resolved": "f12754b3de93f1766e6b1ea7f1f7031b78a993ee"
+      "resolved": "41fbf76f97ac44c662d40e5e5df15e0194ef264a"
     },
     "plot": {
-      "url": "github.com/mseminatore/clay-plot@v0.9.2",
-      "version": "v0.9.2",
-      "resolved": "4c5429580ec370ae946b185d4d49770f460f763f",
+      "url": "github.com/mseminatore/clay-plot@v0.9.3",
+      "version": "v0.9.3",
+      "resolved": "3685a296d0e5d7af7bb3dee91adc3de94fea364b",
       "dependency_of": "knit"
     },
     "pdf": {
