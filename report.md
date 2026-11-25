@@ -107,10 +107,8 @@ rows = data toArray
 zeros = features map { |name| 0 }
 
 rows each { |row|
-    c = 0
-    { c < feature_count } whileTrue {
+    feature_count times { |c|
         ((row at(c)) == 0) ifTrue { zeros setAt(c, (zeros at(c)) + 1) }
-        c = c + 1
     }
 }
 
@@ -129,15 +127,13 @@ The distribution of each feature (raw, before cleaning) is shown in @fig-hist. T
 hist_rows = data toArray
 [hist_fig, hist_axs] = Plot subplots(2, 4, #{figsize: [9, 4.5]})
 
-i = 0
-{ i < feature_count } whileTrue {
+feature_count times { |i|
     hist_r = (i >= 4) ifTrue { 1 } ifFalse { 0 }
     hist_c = i - 4 * hist_r
     hist_ax = (hist_axs at(hist_r)) at(hist_c)
     hist_vals = hist_rows map { |row| row at(i) }
     hist_ax hist(hist_vals, 20, #{color: "steelblue"})
     hist_ax title(features at(i), #{fontsize: 9})
-    i = i + 1
 }
 ```
 
@@ -146,8 +142,7 @@ Splitting the same distributions by outcome, in @fig-byclass, shows which featur
 ```{clay #fig-byclass caption="Feature distributions by outcome (missing values excluded)."}
 [cls_fig, cls_axs] = Plot subplots(2, 4, #{figsize: [9, 4.5]})
 
-i = 0
-{ i < feature_count } whileTrue {
+feature_count times { |i|
     cls_r = (i >= 4) ifTrue { 1 } ifFalse { 0 }
     cls_c = i - 4 * cls_r
     cls_ax = (cls_axs at(cls_r)) at(cls_c)
@@ -166,7 +161,6 @@ i = 0
     cls_ax hist(cls_pos, 15, #{color: "tomato", alpha: 0.6, label: "Diabetes"})
     cls_ax title(features at(i), #{fontsize: 9})
     (i == 0) ifTrue { cls_ax legend(#{fontsize: 7}) }
-    i = i + 1
 }
 ```
 
@@ -183,8 +177,7 @@ value of all training_data columns and to use that to replace missing data field
     imputeMeans = { |train_data|
         rows = train_data toArray
         means = []
-        c = 0
-        { c < train_data cols } whileTrue {
+        train_data cols times { |c|
             sum = 0
             n = 0
             rows each { |row|
@@ -192,7 +185,6 @@ value of all training_data columns and to use that to replace missing data field
                 (v != 0) ifTrue { sum = sum + v; n = n + 1 }
             }
             means push((n > 0) ifTrue { sum / n } ifFalse { 0 })
-            c = c + 1
         }
 
         "Column avgs: ${means}" println
@@ -211,22 +203,6 @@ value of all training_data columns and to use that to replace missing data field
         AnnData fromArray(rows)
     }
 
-    // z-score the feature columns: (x - mean) / std. 
-    // The label column is left untouched.
-    standardize = { |data, means, stds|
-        rows = data toArray
-
-        rows each { |row|
-            c = 0
-            { c < feature_count } whileTrue {
-                row setAt(c, ((row at(c)) - (means at(c))) / (stds at(c)))
-                c = c + 1
-            }
-        }
-        
-        AnnData fromArray(rows)
-    }
-
     // impute and standardize every split using statistics from the 
     // training split only
     clean = { |train_data, val_data, test_data|
@@ -236,9 +212,13 @@ value of all training_data columns and to use that to replace missing data field
         val_data = impute(val_data, means)
         test_data = impute(test_data, means)
 
+        // z-score the feature columns, (x - mean) / std, with the training split's
+        // statistics. The label column (the last) gets mean 0 and std 1: left as it is.
         mu = train_data mean
         sigma = train_data std
-        [standardize(train_data, mu, sigma), standardize(val_data, mu, sigma), standardize(test_data, mu, sigma)]
+        mu setAt(feature_count, 0)
+        sigma setAt(feature_count, 1)
+        [train_data standardize(mu, sigma), val_data standardize(mu, sigma), test_data standardize(mu, sigma)]
     }
 ```
 
@@ -278,48 +258,23 @@ corr_rows = train_data toArray
 corr_n = corr_names size
 corr_count = corr_rows size
 
-corr_mean = []
-corr_sd = []
-
-a = 0
-{ a < corr_n } whileTrue {
-    total = 0
-    r = 0
-    { r < corr_count } whileTrue { total = total + ((corr_rows at(r)) at(a)); r = r + 1 }
-    m = total / corr_count
-    ss = 0
-
-    r = 0
-    { r < corr_count } whileTrue {
-        d = ((corr_rows at(r)) at(a)) - m
-        ss = ss + d * d
-        r = r + 1
-    }
-    
-    corr_mean push(m)
-    corr_sd push(Math sqrt(ss / corr_count))
-    a = a + 1
-}
+// each column's mean and standard deviation (over all corr_count rows, as Pearson's r needs)
+corr_mean = train_data mean
+corr_sd = train_data std
 
 corr_matrix = []
-a = 0
-{ a < corr_n } whileTrue {
+corr_n times { |a|
     line = []
 
-    b = 0
-    { b < corr_n } whileTrue {
+    corr_n times { |b|
         cov = 0
-        r = 0
-        { r < corr_count } whileTrue {
-            cov = cov + (((corr_rows at(r)) at(a)) - (corr_mean at(a))) * (((corr_rows at(r)) at(b)) - (corr_mean at(b)))
-            r = r + 1
+        corr_rows each { |row|
+            cov = cov + ((row at(a)) - (corr_mean at(a))) * ((row at(b)) - (corr_mean at(b)))
         }
         line push((cov / corr_count) / ((corr_sd at(a)) * (corr_sd at(b))))
-        b = b + 1
     }
 
     corr_matrix push(line)
-    a = a + 1
 }
 
 Plot figure(#{figsize: [7, 6]})
@@ -328,15 +283,11 @@ Plot colorbar(corr_image, #{label: "Pearson r"})
 Plot xticks([0, 1, 2, 3, 4, 5, 6, 7, 8], corr_names, #{rotation: 45})
 Plot yticks([0, 1, 2, 3, 4, 5, 6, 7, 8], corr_names)
 
-a = 0
-{ a < corr_n } whileTrue {
+corr_n times { |a|
 
-    b = 0
-    { b < corr_n } whileTrue {
+    corr_n times { |b|
         Plot text(b, a, (Math round((corr_matrix at(a) at(b)) * 100) / 100.0) toString, #{ha: "center", va: "center", fontsize: 7})
-        b = b + 1
     }
-    a = a + 1
 }
 
 Plot title("Feature correlations")
@@ -385,12 +336,10 @@ Having cleaned the data and defined our network model it is time to train agains
         xs = x toArray
         ys = y toArray
         correct = 0
-        i = 0
-        { i < xs size } whileTrue {
+        xs size times { |i|
             p = net predict(xs at(i))
             guess = ((p at(0)) >= 0.5) ifTrue { 1 } ifFalse { 0 }
             (guess == ((ys at(i)) at(0))) ifTrue { correct = correct + 1 }
-            i = i + 1
         }
         (correct * 1.0) / xs size
     }
@@ -442,15 +391,13 @@ fp = 0
 fn = 0
 tp = 0
 
-k = 0
-{ k < test_probs size } whileTrue {
+test_probs size times { |k|
     guess = (((test_probs at(k)) at(0)) >= 0.5) ifTrue { 1 } ifFalse { 0 }
     actual = (test_truth at(k)) at(0)
     ((actual == 0) && (guess == 0)) ifTrue { tn = tn + 1 }
     ((actual == 0) && (guess == 1)) ifTrue { fp = fp + 1 }
     ((actual == 1) && (guess == 0)) ifTrue { fn = fn + 1 }
     ((actual == 1) && (guess == 1)) ifTrue { tp = tp + 1 }
-    k = k + 1
 }
 
 Plot figure(#{figsize: [4.5, 4]})
@@ -476,10 +423,8 @@ roc_result = Plot roc(test_scores, test_labels, #{chance: true, title: "ROC curv
 ```{clay #fig-probs caption="Predicted probability of diabetes on the test split, by true outcome."}
 probs_neg = []
 probs_pos = []
-k = 0
-{ k < test_scores size } whileTrue {
+test_scores size times { |k|
     ((test_labels at(k)) == 1) ifTrue { probs_pos push(test_scores at(k)) } ifFalse { probs_neg push(test_scores at(k)) }
-    k = k + 1
 }
 Plot figure(#{figsize: [6, 3.5]})
 Plot hist(probs_neg, 10, #{range: [0, 1], color: "steelblue", alpha: 0.6, label: "No diabetes"})
@@ -504,29 +449,21 @@ imp_base = accuracy(x_test, y_test)
 imp_shifts = [7, 19, 31, 43]
 
 imp_drops = []
-f = 0
-{ f < feature_count } whileTrue {
+feature_count times { |f|
     total = 0
-    s = 0
-    { s < imp_shifts size } whileTrue {
+    imp_shifts each { |shift|
         shifted = []
-        r = 0
-        { r < imp_n } whileTrue {
+        imp_n times { |r|
             row = []
-            c = 0
-            { c < feature_count } whileTrue {
-                src = (c == f) ifTrue { (r + (imp_shifts at(s))) % imp_n } ifFalse { r }
+            feature_count times { |c|
+                src = (c == f) ifTrue { (r + shift) % imp_n } ifFalse { r }
                 row push((imp_rows at(src)) at(c))
-                c = c + 1
             }
             shifted push(row)
-            r = r + 1
         }
         total = total + (imp_base - accuracy(AnnData fromArray(shifted), y_test))
-        s = s + 1
     }
     imp_drops push(total / imp_shifts size)
-    f = f + 1
 }
 
 Plot figure(#{figsize: [6, 4]})
@@ -566,11 +503,9 @@ Rounding weights this coarsely loses information, so each low-bit format is test
     score = { |m|
         q_scores = (x_test toArray) map { |row| (m predict(row)) at(0) }
         q_correct = 0
-        k = 0
-        { k < q_scores size } whileTrue {
+        q_scores size times { |k|
             q_guess = ((q_scores at(k)) >= 0.5) ifTrue { 1 } ifFalse { 0 }
             (q_guess == (test_labels at(k))) ifTrue { q_correct = q_correct + 1 }
-            k = k + 1
         }
         [(q_correct * 1.0) / q_scores size, (PlotML rocCurve(q_scores, test_labels)) get("auc")]
     }
@@ -611,8 +546,7 @@ Rounding weights this coarsely loses information, so each low-bit format is test
 q_pos = [0, 1, 2, 3, 4]
 q_names = ["Accuracy", "AUC"]
 
-j = 0
-{ j < 2 } whileTrue {
+2 times { |j|
     q_ax = q_axs at(j)
     q_ax bar([0, 1, 1.8, 2.8, 3.8], q_rounded map { |s| s at(j) }, #{width: 0.4, color: "steelblue", label: "Rounded"})
     q_ax bar([2.2, 3.2, 4.2], [2, 3, 4] map { |i| (q_tuned at(i)) at(j) }, #{width: 0.4, color: "tomato", label: "Fine-tuned"})
@@ -623,7 +557,6 @@ j = 0
         q_ax axhline(0.65, #{color: "gray", linestyle: "--"})
         q_ax legend(#{fontsize: 8})
     }
-    j = j + 1
 }
 ```
 

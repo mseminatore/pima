@@ -105,7 +105,7 @@ Plot barLabel(class_bars, #{fmt: &quot;%d&quot;})
 Plot ylabel(&quot;Patients&quot;)
 Plot title(&quot;Classes are not balanced&quot;)</code></pre>
 <figure id="fig-balance">
-<svg id="plt9a071ff089de" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="400" height="350" viewBox="0 0 400 350" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
+<svg id="pltc816423dd792" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="400" height="350" viewBox="0 0 400 350" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
 <rect width="100%" height="100%" fill="#ffffff"/>
 <clipPath id="clip1"><rect x="66.79" y="37.5" width="294.05" height="280.56"/></clipPath>
 <g clip-path="url(#clip1)">
@@ -139,7 +139,7 @@ Plot title(&quot;Classes are not balanced&quot;)</code></pre>
 <text transform="translate(25 177.78) rotate(-90)" y="-3.33" font-size="13.89" text-anchor="middle">Patients</text>
 <text x="213.81" y="25.17" font-size="16.67" text-anchor="middle">Classes are not balanced</text>
 <script type="text/javascript">//<![CDATA[
-(function(){var svg=document.getElementById("plt9a071ff089de");if(!svg)return;var D={a:[[66.79,37.5,294.05,280.56]],t:[[1,0,1,80.15,50.86,118.81,267.2,["","x: No diabetes","Patients: 500"],"#4682b4"],
+(function(){var svg=document.getElementById("pltc816423dd792");if(!svg)return;var D={a:[[66.79,37.5,294.05,280.56]],t:[[1,0,1,80.15,50.86,118.81,267.2,["","x: No diabetes","Patients: 500"],"#4682b4"],
 [1,0,1,228.67,174.84,118.81,143.22,["","x: Diabetes","Patients: 268"],"#ff6347"]]},FS=13.89,R=13.89;var NS='http://www.w3.org/2000/svg',hidden={};function mk(n,a){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);return e;}var hl=mk('g',{'pointer-events':'none'}),tip=mk('g',{'pointer-events':'none'});var box=mk('rect',{rx:3,ry:3,fill:'#ffffff','fill-opacity':0.95,stroke:'#999999','stroke-width':1});var txt=mk('text',{'font-size':FS,fill:'#222222'});tip.appendChild(box);tip.appendChild(txt);tip.style.display='none';svg.appendChild(hl);svg.appendChild(tip);function fmt(v){if(v===null||v===undefined)return '-';var a=Math.abs(v);if(a!==0&&(a>=1e6||a<1e-4))return v.toExponential(3);return String(Number(v.toPrecision(4)));}function at(e){var p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(svg.getScreenCTM().inverse());}function inAx(x,y){for(var i=D.a.length-1;i>=0;i--){var b=D.a[i];if(x>=b[0]&&x<=b[0]+b[2]&&y>=b[1]&&y<=b[1]+b[3])return i;}return -1;}function find(x,y){var ax=inAx(x,y);if(ax<0)return null;var best=null,bd=R*R,hit=null,i,t;for(i=0;i<D.t.length;i++){t=D.t[i];if(t[1]!==ax||hidden[t[2]])continue;if(t[0]===0){var dx=t[3]-x,dy=t[4]-y,d=dx*dx+dy*dy;if(d<=bd){bd=d;best={x:t[3],y:t[4],lines:t[5],c:t[6],k:'p'};}}else if(t[0]===1){if(x>=t[3]&&x<=t[3]+t[5]&&y>=t[4]&&y<=t[4]+t[6])hit={x:t[3],y:t[4],w:t[5],h:t[6],lines:t[7],c:t[8],k:'r'};}else if(t[0]===3){var ex=x-t[3],ey=t[4]-y,r=Math.sqrt(ex*ex+ey*ey);if(r>=t[5]&&r<=t[6]){var a=Math.atan2(ey,ex)*180/Math.PI,lo=Math.min(t[7],t[8]),hi=Math.max(t[7],t[8]);while(a<lo)a+=360;while(a>lo+360)a-=360;if(a<=hi)hit={x:x,y:y,lines:t[9],c:t[10],k:'w'};}}else if(t[0]===2&&!hit){if(x>=t[3]&&x<t[3]+t[5]&&y>=t[4]&&y<t[4]+t[6]){var cw=t[5]/t[8],ch=t[6]/t[7],c=Math.floor((x-t[3])/cw),rr=Math.floor((y-t[4])/ch),row=t[9]?t[7]-1-rr:rr;var v=t[10][row*t[8]+c],ls=[t[11]];ls.push((t[12]?t[12][row]:'row '+row)+', '+(t[13]?t[13][c]:'column '+c));ls.push('value: '+fmt(v));hit={x:t[3]+c*cw,y:t[4]+rr*ch,w:cw,h:ch,lines:ls,c:'#000000',k:'r'};}}}return best||hit;}function hide(){tip.style.display='none';while(hl.firstChild)hl.removeChild(hl.firstChild);}function show(h,x,y){while(hl.firstChild)hl.removeChild(hl.firstChild);if(h.k==='p')hl.appendChild(mk('circle',{cx:h.x,cy:h.y,r:FS*0.45,fill:'none',stroke:h.c||'#000000','stroke-width':2}));if(h.k==='r')hl.appendChild(mk('rect',{x:h.x,y:h.y,width:h.w,height:h.h,fill:'none',stroke:'#000000','stroke-width':1.5,'stroke-opacity':0.6}));while(txt.firstChild)txt.removeChild(txt.firstChild);var n=0;for(var i=0;i<h.lines.length;i++){var l=h.lines[i];if(l===''||l===null)continue;var s=mk('tspan',{x:0,dy:n===0?0:FS*1.25});if(i===0&&h.lines.length>1)s.setAttribute('font-weight','bold');s.textContent=l;txt.appendChild(s);n++;}if(n===0){hide();return;}tip.style.display='';var b=txt.getBBox(),p=FS*0.4;box.setAttribute('x',b.x-p);box.setAttribute('y',b.y-p);box.setAttribute('width',b.width+2*p);box.setAttribute('height',b.height+2*p);var W=svg.viewBox.baseVal.width,H=svg.viewBox.baseVal.height,tx=x+FS,ty=y+FS*1.5;if(tx+b.width+2*p>W)tx=x-FS-b.width-p;if(ty+b.height+p>H)ty=y-b.height-FS*0.5;if(tx<p)tx=p;if(ty<FS)ty=FS;tip.setAttribute('transform','translate('+tx+','+ty+')');}svg.addEventListener('mousemove',function(e){var p=at(e),h=find(p.x,p.y);if(h)show(h,p.x,p.y);else hide();});svg.addEventListener('mouseleave',hide);var items=svg.querySelectorAll('.plt-l');for(var j=0;j<items.length;j++){(function(it){it.addEventListener('click',function(){var s=it.getAttribute('data-s');hidden[s]=!hidden[s];var gs=svg.querySelectorAll('.plt-s[data-s=\''+s+'\']');for(var k=0;k<gs.length;k++)gs[k].style.display=hidden[s]?'none':'';it.style.opacity=hidden[s]?0.35:1;hide();});})(items[j]);}})();
 //]]></script>
 </svg>
@@ -151,10 +151,8 @@ Plot title(&quot;Classes are not balanced&quot;)</code></pre>
 zeros = features map { |name| 0 }
 
 rows each { |row|
-    c = 0
-    { c &lt; feature_count } whileTrue {
+    feature_count times { |c|
         ((row at(c)) == 0) ifTrue { zeros setAt(c, (zeros at(c)) + 1) }
-        c = c + 1
     }
 }
 
@@ -164,7 +162,7 @@ Plot barLabel(bars, #{fmt: &quot;%d&quot;})
 Plot ylabel(&quot;Rows with 0&quot;)
 Plot title(&quot;Missing data by feature&quot;)</code></pre>
 <figure id="fig-zeros">
-<svg id="plt192bc6172930" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="700" height="350" viewBox="0 0 700 350" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
+<svg id="plt58f009a02493" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="700" height="350" viewBox="0 0 700 350" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
 <rect width="100%" height="100%" fill="#ffffff"/>
 <clipPath id="clip1"><rect x="66.79" y="37.5" width="611.45" height="280.56"/></clipPath>
 <g clip-path="url(#clip1)">
@@ -226,7 +224,7 @@ Plot title(&quot;Missing data by feature&quot;)</code></pre>
 <text transform="translate(25 177.78) rotate(-90)" y="-3.33" font-size="13.89" text-anchor="middle">Rows with 0</text>
 <text x="372.51" y="25.17" font-size="16.67" text-anchor="middle">Missing data by feature</text>
 <script type="text/javascript">//<![CDATA[
-(function(){var svg=document.getElementById("plt192bc6172930");if(!svg)return;var D={a:[[66.79,37.5,611.45,280.56]],t:[[1,0,1,94.58,238.75,57.01,79.3,["","x: Preg","Rows with 0: 111"],"#4682b4"],
+(function(){var svg=document.getElementById("plt58f009a02493");if(!svg)return;var D={a:[[66.79,37.5,611.45,280.56]],t:[[1,0,1,94.58,238.75,57.01,79.3,["","x: Preg","Rows with 0: 111"],"#4682b4"],
 [1,0,1,165.84,314.48,57.01,3.57,["","x: Gluc","Rows with 0: 5"],"#4682b4"],
 [1,0,1,237.11,293.05,57.01,25,["","x: BP","Rows with 0: 35"],"#4682b4"],
 [1,0,1,308.37,155.88,57.01,162.17,["","x: Skin","Rows with 0: 227"],"#4682b4"],
@@ -243,18 +241,16 @@ Plot title(&quot;Missing data by feature&quot;)</code></pre>
 <pre class="code"><code class="language-clay">hist_rows = data toArray
 [hist_fig, hist_axs] = Plot subplots(2, 4, #{figsize: [9, 4.5]})
 
-i = 0
-{ i &lt; feature_count } whileTrue {
+feature_count times { |i|
     hist_r = (i &gt;= 4) ifTrue { 1 } ifFalse { 0 }
     hist_c = i - 4 * hist_r
     hist_ax = (hist_axs at(hist_r)) at(hist_c)
     hist_vals = hist_rows map { |row| row at(i) }
     hist_ax hist(hist_vals, 20, #{color: &quot;steelblue&quot;})
     hist_ax title(features at(i), #{fontsize: 9})
-    i = i + 1
 }</code></pre>
 <figure id="fig-hist">
-<svg id="plt4fcabc51cc6b" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="900" height="450" viewBox="0 0 900 450" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
+<svg id="plt28281cef0a3d" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="900" height="450" viewBox="0 0 900 450" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
 <rect width="100%" height="100%" fill="#ffffff"/>
 <clipPath id="clip1"><rect x="51.51" y="39.24" width="157.46" height="155.21"/></clipPath>
 <g clip-path="url(#clip1)">
@@ -609,7 +605,7 @@ i = 0
 <text x="704.29" y="287.95" font-size="13.89" text-anchor="end">150</text>
 <text x="792.74" y="244.57" font-size="12.5" text-anchor="middle">Age</text>
 <script type="text/javascript">//<![CDATA[
-(function(){var svg=document.getElementById("plt4fcabc51cc6b");if(!svg)return;var D={a:[[51.51,39.24,157.46,155.21],[272.34,39.24,157.46,155.21],[493.18,39.24,157.46,155.21],[714.01,39.24,157.46,155.21],[51.51,255.9,157.46,155.21],[272.34,255.9,157.46,155.21],[493.18,255.9,157.46,155.21],[714.01,255.9,157.46,155.21]],t:[[1,0,1,58.67,72.91,7.16,121.54,["","x: 0 to 0.85","y: 111"],"#4682b4"],
+(function(){var svg=document.getElementById("plt28281cef0a3d");if(!svg)return;var D={a:[[51.51,39.24,157.46,155.21],[272.34,39.24,157.46,155.21],[493.18,39.24,157.46,155.21],[714.01,39.24,157.46,155.21],[51.51,255.9,157.46,155.21],[272.34,255.9,157.46,155.21],[493.18,255.9,157.46,155.21],[714.01,255.9,157.46,155.21]],t:[[1,0,1,58.67,72.91,7.16,121.54,["","x: 0 to 0.85","y: 111"],"#4682b4"],
 [1,0,1,65.82,46.63,7.16,147.82,["","x: 0.85 to 1.7","y: 135"],"#4682b4"],
 [1,0,1,72.98,81.67,7.16,112.78,["","x: 1.7 to 2.55","y: 103"],"#4682b4"],
 [1,0,1,80.14,112.32,7.16,82.12,["","x: 2.55 to 3.4","y: 75"],"#4682b4"],
@@ -776,8 +772,7 @@ i = 0
 <p>Splitting the same distributions by outcome, in <a href="#fig-byclass">Figure 4</a>, shows which features actually separate the two groups (the missing-value zeros are left out here). Glucose, and to a lesser degree BMI and Age, shift clearly to the right for diabetic patients, while BloodPressure and SkinThickness barely differ.</p>
 <pre class="code"><code class="language-clay">[cls_fig, cls_axs] = Plot subplots(2, 4, #{figsize: [9, 4.5]})
 
-i = 0
-{ i &lt; feature_count } whileTrue {
+feature_count times { |i|
     cls_r = (i &gt;= 4) ifTrue { 1 } ifFalse { 0 }
     cls_c = i - 4 * cls_r
     cls_ax = (cls_axs at(cls_r)) at(cls_c)
@@ -796,10 +791,9 @@ i = 0
     cls_ax hist(cls_pos, 15, #{color: &quot;tomato&quot;, alpha: 0.6, label: &quot;Diabetes&quot;})
     cls_ax title(features at(i), #{fontsize: 9})
     (i == 0) ifTrue { cls_ax legend(#{fontsize: 7}) }
-    i = i + 1
 }</code></pre>
 <figure id="fig-byclass">
-<svg id="plt0207afa4aa76" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="900" height="450" viewBox="0 0 900 450" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
+<svg id="plte34dd1a22c52" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="900" height="450" viewBox="0 0 900 450" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
 <rect width="100%" height="100%" fill="#ffffff"/>
 <clipPath id="clip1"><rect x="51.51" y="39.24" width="157.46" height="155.21"/></clipPath>
 <g clip-path="url(#clip1)">
@@ -1255,7 +1249,7 @@ i = 0
 <text x="704.29" y="298.17" font-size="13.89" text-anchor="end">150</text>
 <text x="792.74" y="244.57" font-size="12.5" text-anchor="middle">Age</text>
 <script type="text/javascript">//<![CDATA[
-(function(){var svg=document.getElementById("plt0207afa4aa76");if(!svg)return;var D={a:[[51.51,39.24,157.46,155.21],[272.34,39.24,157.46,155.21],[493.18,39.24,157.46,155.21],[714.01,39.24,157.46,155.21],[51.51,255.9,157.46,155.21],[272.34,255.9,157.46,155.21],[493.18,255.9,157.46,155.21],[714.01,255.9,157.46,155.21]],t:[[1,0,1,58.67,92.65,7.3,101.8,["No diabetes","x: 0 to 0.8667","y: 73"],"#4682b4"],
+(function(){var svg=document.getElementById("plte34dd1a22c52");if(!svg)return;var D={a:[[51.51,39.24,157.46,155.21],[272.34,39.24,157.46,155.21],[493.18,39.24,157.46,155.21],[714.01,39.24,157.46,155.21],[51.51,255.9,157.46,155.21],[272.34,255.9,157.46,155.21],[493.18,255.9,157.46,155.21],[714.01,255.9,157.46,155.21]],t:[[1,0,1,58.67,92.65,7.3,101.8,["No diabetes","x: 0 to 0.8667","y: 73"],"#4682b4"],
 [1,0,1,65.96,46.63,7.3,147.82,["No diabetes","x: 0.8667 to 1.733","y: 106"],"#4682b4"],
 [1,0,1,73.26,77.31,7.3,117.14,["No diabetes","x: 1.733 to 2.6","y: 84"],"#4682b4"],
 [1,0,1,80.56,127.51,7.3,66.94,["No diabetes","x: 2.6 to 3.467","y: 48"],"#4682b4"],
@@ -1507,8 +1501,7 @@ i = 0
     imputeMeans = { |train_data|
         rows = train_data toArray
         means = []
-        c = 0
-        { c &lt; train_data cols } whileTrue {
+        train_data cols times { |c|
             sum = 0
             n = 0
             rows each { |row|
@@ -1516,7 +1509,6 @@ i = 0
                 (v != 0) ifTrue { sum = sum + v; n = n + 1 }
             }
             means push((n &gt; 0) ifTrue { sum / n } ifFalse { 0 })
-            c = c + 1
         }
 
         &quot;Column avgs: ${means}&quot; println
@@ -1535,22 +1527,6 @@ i = 0
         AnnData fromArray(rows)
     }
 
-    // z-score the feature columns: (x - mean) / std. 
-    // The label column is left untouched.
-    standardize = { |data, means, stds|
-        rows = data toArray
-
-        rows each { |row|
-            c = 0
-            { c &lt; feature_count } whileTrue {
-                row setAt(c, ((row at(c)) - (means at(c))) / (stds at(c)))
-                c = c + 1
-            }
-        }
-        
-        AnnData fromArray(rows)
-    }
-
     // impute and standardize every split using statistics from the 
     // training split only
     clean = { |train_data, val_data, test_data|
@@ -1560,9 +1536,13 @@ i = 0
         val_data = impute(val_data, means)
         test_data = impute(test_data, means)
 
+        // z-score the feature columns, (x - mean) / std, with the training split's
+        // statistics. The label column (the last) gets mean 0 and std 1: left as it is.
         mu = train_data mean
         sigma = train_data std
-        [standardize(train_data, mu, sigma), standardize(val_data, mu, sigma), standardize(test_data, mu, sigma)]
+        mu setAt(feature_count, 0)
+        sigma setAt(feature_count, 1)
+        [train_data standardize(mu, sigma), val_data standardize(mu, sigma), test_data standardize(mu, sigma)]
     }</code></pre>
 <h2 id="splitting-the-data">Splitting the data</h2>
 <p>Now that we have a method for cleaning the data, we can split the full dataset into training, validation and testing groups. We use an 80/10/10 split for this analysis.</p>
@@ -1593,48 +1573,23 @@ corr_rows = train_data toArray
 corr_n = corr_names size
 corr_count = corr_rows size
 
-corr_mean = []
-corr_sd = []
-
-a = 0
-{ a &lt; corr_n } whileTrue {
-    total = 0
-    r = 0
-    { r &lt; corr_count } whileTrue { total = total + ((corr_rows at(r)) at(a)); r = r + 1 }
-    m = total / corr_count
-    ss = 0
-
-    r = 0
-    { r &lt; corr_count } whileTrue {
-        d = ((corr_rows at(r)) at(a)) - m
-        ss = ss + d * d
-        r = r + 1
-    }
-    
-    corr_mean push(m)
-    corr_sd push(Math sqrt(ss / corr_count))
-    a = a + 1
-}
+// each column's mean and standard deviation (over all corr_count rows, as Pearson's r needs)
+corr_mean = train_data mean
+corr_sd = train_data std
 
 corr_matrix = []
-a = 0
-{ a &lt; corr_n } whileTrue {
+corr_n times { |a|
     line = []
 
-    b = 0
-    { b &lt; corr_n } whileTrue {
+    corr_n times { |b|
         cov = 0
-        r = 0
-        { r &lt; corr_count } whileTrue {
-            cov = cov + (((corr_rows at(r)) at(a)) - (corr_mean at(a))) * (((corr_rows at(r)) at(b)) - (corr_mean at(b)))
-            r = r + 1
+        corr_rows each { |row|
+            cov = cov + ((row at(a)) - (corr_mean at(a))) * ((row at(b)) - (corr_mean at(b)))
         }
         line push((cov / corr_count) / ((corr_sd at(a)) * (corr_sd at(b))))
-        b = b + 1
     }
 
     corr_matrix push(line)
-    a = a + 1
 }
 
 Plot figure(#{figsize: [7, 6]})
@@ -1643,20 +1598,16 @@ Plot colorbar(corr_image, #{label: &quot;Pearson r&quot;})
 Plot xticks([0, 1, 2, 3, 4, 5, 6, 7, 8], corr_names, #{rotation: 45})
 Plot yticks([0, 1, 2, 3, 4, 5, 6, 7, 8], corr_names)
 
-a = 0
-{ a &lt; corr_n } whileTrue {
+corr_n times { |a|
 
-    b = 0
-    { b &lt; corr_n } whileTrue {
+    corr_n times { |b|
         Plot text(b, a, (Math round((corr_matrix at(a) at(b)) * 100) / 100.0) toString, #{ha: &quot;center&quot;, va: &quot;center&quot;, fontsize: 7})
-        b = b + 1
     }
-    a = a + 1
 }
 
 Plot title(&quot;Feature correlations&quot;)</code></pre>
 <figure id="fig-corr">
-<svg id="plt9d8fa8b71fd6" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="700" height="600" viewBox="0 0 700 600" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
+<svg id="plt7aa3e0964650" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="700" height="600" viewBox="0 0 700 600" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
 <rect width="100%" height="100%" fill="#ffffff"/>
 <clipPath id="clip1"><rect x="87.73" y="37.5" width="489.8" height="489.8"/></clipPath>
 <g clip-path="url(#clip1)">
@@ -1808,7 +1759,7 @@ Plot title(&quot;Feature correlations&quot;)</code></pre>
 <text x="620.59" y="42.5" font-size="13.89">1.00</text>
 <text transform="translate(668.71 282.4) rotate(-90)" y="10.56" font-size="13.89" text-anchor="middle">Pearson r</text>
 <script type="text/javascript">//<![CDATA[
-(function(){var svg=document.getElementById("plt9d8fa8b71fd6");if(!svg)return;var D={a:[[87.73,37.5,489.8,489.8]],t:[[2,0,1,87.73,37.5,489.8,489.8,9,9,0,[1,0.13542,0.175084,0.076939,0.074079,0.027181,−0.047127,0.535479,0.211148,0.13542,1,0.211085,0.197782,0.428237,0.22687,0.149387,0.277712,0.490223,0.175084,0.211085,1,0.184822,0.103607,0.273661,−0.033857,0.306945,0.171457,0.076939,0.197782,0.184822,1,0.182261,0.547047,0.105721,0.128849,0.219059,0.074079,0.428237,0.103607,0.182261,1,0.170355,0.138101,0.168271,0.226171,0.027181,0.22687,0.273661,0.547047,0.170355,1,0.144367,0.016698,0.331373,−0.047127,0.149387,−0.033857,0.105721,0.138101,0.144367,1,0.03487,0.18909,0.535479,0.277712,0.306945,0.128849,0.168271,0.016698,0.03487,1,0.218166,0.211148,0.490223,0.171457,0.219059,0.226171,0.331373,0.18909,0.218166,1],"Pearson r",["Preg","Gluc","BP","Skin","Insulin","BMI","Pedigree","Age","Outcome"],["Preg","Gluc","BP","Skin","Insulin","BMI","Pedigree","Age","Outcome"]]]},FS=13.89,R=13.89;var NS='http://www.w3.org/2000/svg',hidden={};function mk(n,a){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);return e;}var hl=mk('g',{'pointer-events':'none'}),tip=mk('g',{'pointer-events':'none'});var box=mk('rect',{rx:3,ry:3,fill:'#ffffff','fill-opacity':0.95,stroke:'#999999','stroke-width':1});var txt=mk('text',{'font-size':FS,fill:'#222222'});tip.appendChild(box);tip.appendChild(txt);tip.style.display='none';svg.appendChild(hl);svg.appendChild(tip);function fmt(v){if(v===null||v===undefined)return '-';var a=Math.abs(v);if(a!==0&&(a>=1e6||a<1e-4))return v.toExponential(3);return String(Number(v.toPrecision(4)));}function at(e){var p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(svg.getScreenCTM().inverse());}function inAx(x,y){for(var i=D.a.length-1;i>=0;i--){var b=D.a[i];if(x>=b[0]&&x<=b[0]+b[2]&&y>=b[1]&&y<=b[1]+b[3])return i;}return -1;}function find(x,y){var ax=inAx(x,y);if(ax<0)return null;var best=null,bd=R*R,hit=null,i,t;for(i=0;i<D.t.length;i++){t=D.t[i];if(t[1]!==ax||hidden[t[2]])continue;if(t[0]===0){var dx=t[3]-x,dy=t[4]-y,d=dx*dx+dy*dy;if(d<=bd){bd=d;best={x:t[3],y:t[4],lines:t[5],c:t[6],k:'p'};}}else if(t[0]===1){if(x>=t[3]&&x<=t[3]+t[5]&&y>=t[4]&&y<=t[4]+t[6])hit={x:t[3],y:t[4],w:t[5],h:t[6],lines:t[7],c:t[8],k:'r'};}else if(t[0]===3){var ex=x-t[3],ey=t[4]-y,r=Math.sqrt(ex*ex+ey*ey);if(r>=t[5]&&r<=t[6]){var a=Math.atan2(ey,ex)*180/Math.PI,lo=Math.min(t[7],t[8]),hi=Math.max(t[7],t[8]);while(a<lo)a+=360;while(a>lo+360)a-=360;if(a<=hi)hit={x:x,y:y,lines:t[9],c:t[10],k:'w'};}}else if(t[0]===2&&!hit){if(x>=t[3]&&x<t[3]+t[5]&&y>=t[4]&&y<t[4]+t[6]){var cw=t[5]/t[8],ch=t[6]/t[7],c=Math.floor((x-t[3])/cw),rr=Math.floor((y-t[4])/ch),row=t[9]?t[7]-1-rr:rr;var v=t[10][row*t[8]+c],ls=[t[11]];ls.push((t[12]?t[12][row]:'row '+row)+', '+(t[13]?t[13][c]:'column '+c));ls.push('value: '+fmt(v));hit={x:t[3]+c*cw,y:t[4]+rr*ch,w:cw,h:ch,lines:ls,c:'#000000',k:'r'};}}}return best||hit;}function hide(){tip.style.display='none';while(hl.firstChild)hl.removeChild(hl.firstChild);}function show(h,x,y){while(hl.firstChild)hl.removeChild(hl.firstChild);if(h.k==='p')hl.appendChild(mk('circle',{cx:h.x,cy:h.y,r:FS*0.45,fill:'none',stroke:h.c||'#000000','stroke-width':2}));if(h.k==='r')hl.appendChild(mk('rect',{x:h.x,y:h.y,width:h.w,height:h.h,fill:'none',stroke:'#000000','stroke-width':1.5,'stroke-opacity':0.6}));while(txt.firstChild)txt.removeChild(txt.firstChild);var n=0;for(var i=0;i<h.lines.length;i++){var l=h.lines[i];if(l===''||l===null)continue;var s=mk('tspan',{x:0,dy:n===0?0:FS*1.25});if(i===0&&h.lines.length>1)s.setAttribute('font-weight','bold');s.textContent=l;txt.appendChild(s);n++;}if(n===0){hide();return;}tip.style.display='';var b=txt.getBBox(),p=FS*0.4;box.setAttribute('x',b.x-p);box.setAttribute('y',b.y-p);box.setAttribute('width',b.width+2*p);box.setAttribute('height',b.height+2*p);var W=svg.viewBox.baseVal.width,H=svg.viewBox.baseVal.height,tx=x+FS,ty=y+FS*1.5;if(tx+b.width+2*p>W)tx=x-FS-b.width-p;if(ty+b.height+p>H)ty=y-b.height-FS*0.5;if(tx<p)tx=p;if(ty<FS)ty=FS;tip.setAttribute('transform','translate('+tx+','+ty+')');}svg.addEventListener('mousemove',function(e){var p=at(e),h=find(p.x,p.y);if(h)show(h,p.x,p.y);else hide();});svg.addEventListener('mouseleave',hide);var items=svg.querySelectorAll('.plt-l');for(var j=0;j<items.length;j++){(function(it){it.addEventListener('click',function(){var s=it.getAttribute('data-s');hidden[s]=!hidden[s];var gs=svg.querySelectorAll('.plt-s[data-s=\''+s+'\']');for(var k=0;k<gs.length;k++)gs[k].style.display=hidden[s]?'none':'';it.style.opacity=hidden[s]?0.35:1;hide();});})(items[j]);}})();
+(function(){var svg=document.getElementById("plt7aa3e0964650");if(!svg)return;var D={a:[[87.73,37.5,489.8,489.8]],t:[[2,0,1,87.73,37.5,489.8,489.8,9,9,0,[1,0.13542,0.175084,0.076939,0.074079,0.027181,−0.047127,0.535479,0.211149,0.13542,1,0.211085,0.197781,0.428237,0.22687,0.149387,0.277712,0.490223,0.175084,0.211085,0.999999,0.184821,0.103607,0.273661,−0.033857,0.306944,0.171457,0.076939,0.197781,0.184821,1,0.182261,0.547047,0.105721,0.128849,0.219059,0.074079,0.428237,0.103607,0.182261,1,0.170355,0.138101,0.168271,0.226171,0.027181,0.22687,0.273661,0.547047,0.170355,1,0.144367,0.016698,0.331373,−0.047127,0.149387,−0.033857,0.105721,0.138101,0.144367,1,0.03487,0.18909,0.535479,0.277712,0.306944,0.128849,0.168271,0.016698,0.03487,1,0.218166,0.211149,0.490223,0.171457,0.219059,0.226171,0.331373,0.18909,0.218166,1],"Pearson r",["Preg","Gluc","BP","Skin","Insulin","BMI","Pedigree","Age","Outcome"],["Preg","Gluc","BP","Skin","Insulin","BMI","Pedigree","Age","Outcome"]]]},FS=13.89,R=13.89;var NS='http://www.w3.org/2000/svg',hidden={};function mk(n,a){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);return e;}var hl=mk('g',{'pointer-events':'none'}),tip=mk('g',{'pointer-events':'none'});var box=mk('rect',{rx:3,ry:3,fill:'#ffffff','fill-opacity':0.95,stroke:'#999999','stroke-width':1});var txt=mk('text',{'font-size':FS,fill:'#222222'});tip.appendChild(box);tip.appendChild(txt);tip.style.display='none';svg.appendChild(hl);svg.appendChild(tip);function fmt(v){if(v===null||v===undefined)return '-';var a=Math.abs(v);if(a!==0&&(a>=1e6||a<1e-4))return v.toExponential(3);return String(Number(v.toPrecision(4)));}function at(e){var p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(svg.getScreenCTM().inverse());}function inAx(x,y){for(var i=D.a.length-1;i>=0;i--){var b=D.a[i];if(x>=b[0]&&x<=b[0]+b[2]&&y>=b[1]&&y<=b[1]+b[3])return i;}return -1;}function find(x,y){var ax=inAx(x,y);if(ax<0)return null;var best=null,bd=R*R,hit=null,i,t;for(i=0;i<D.t.length;i++){t=D.t[i];if(t[1]!==ax||hidden[t[2]])continue;if(t[0]===0){var dx=t[3]-x,dy=t[4]-y,d=dx*dx+dy*dy;if(d<=bd){bd=d;best={x:t[3],y:t[4],lines:t[5],c:t[6],k:'p'};}}else if(t[0]===1){if(x>=t[3]&&x<=t[3]+t[5]&&y>=t[4]&&y<=t[4]+t[6])hit={x:t[3],y:t[4],w:t[5],h:t[6],lines:t[7],c:t[8],k:'r'};}else if(t[0]===3){var ex=x-t[3],ey=t[4]-y,r=Math.sqrt(ex*ex+ey*ey);if(r>=t[5]&&r<=t[6]){var a=Math.atan2(ey,ex)*180/Math.PI,lo=Math.min(t[7],t[8]),hi=Math.max(t[7],t[8]);while(a<lo)a+=360;while(a>lo+360)a-=360;if(a<=hi)hit={x:x,y:y,lines:t[9],c:t[10],k:'w'};}}else if(t[0]===2&&!hit){if(x>=t[3]&&x<t[3]+t[5]&&y>=t[4]&&y<t[4]+t[6]){var cw=t[5]/t[8],ch=t[6]/t[7],c=Math.floor((x-t[3])/cw),rr=Math.floor((y-t[4])/ch),row=t[9]?t[7]-1-rr:rr;var v=t[10][row*t[8]+c],ls=[t[11]];ls.push((t[12]?t[12][row]:'row '+row)+', '+(t[13]?t[13][c]:'column '+c));ls.push('value: '+fmt(v));hit={x:t[3]+c*cw,y:t[4]+rr*ch,w:cw,h:ch,lines:ls,c:'#000000',k:'r'};}}}return best||hit;}function hide(){tip.style.display='none';while(hl.firstChild)hl.removeChild(hl.firstChild);}function show(h,x,y){while(hl.firstChild)hl.removeChild(hl.firstChild);if(h.k==='p')hl.appendChild(mk('circle',{cx:h.x,cy:h.y,r:FS*0.45,fill:'none',stroke:h.c||'#000000','stroke-width':2}));if(h.k==='r')hl.appendChild(mk('rect',{x:h.x,y:h.y,width:h.w,height:h.h,fill:'none',stroke:'#000000','stroke-width':1.5,'stroke-opacity':0.6}));while(txt.firstChild)txt.removeChild(txt.firstChild);var n=0;for(var i=0;i<h.lines.length;i++){var l=h.lines[i];if(l===''||l===null)continue;var s=mk('tspan',{x:0,dy:n===0?0:FS*1.25});if(i===0&&h.lines.length>1)s.setAttribute('font-weight','bold');s.textContent=l;txt.appendChild(s);n++;}if(n===0){hide();return;}tip.style.display='';var b=txt.getBBox(),p=FS*0.4;box.setAttribute('x',b.x-p);box.setAttribute('y',b.y-p);box.setAttribute('width',b.width+2*p);box.setAttribute('height',b.height+2*p);var W=svg.viewBox.baseVal.width,H=svg.viewBox.baseVal.height,tx=x+FS,ty=y+FS*1.5;if(tx+b.width+2*p>W)tx=x-FS-b.width-p;if(ty+b.height+p>H)ty=y-b.height-FS*0.5;if(tx<p)tx=p;if(ty<FS)ty=FS;tip.setAttribute('transform','translate('+tx+','+ty+')');}svg.addEventListener('mousemove',function(e){var p=at(e),h=find(p.x,p.y);if(h)show(h,p.x,p.y);else hide();});svg.addEventListener('mouseleave',hide);var items=svg.querySelectorAll('.plt-l');for(var j=0;j<items.length;j++){(function(it){it.addEventListener('click',function(){var s=it.getAttribute('data-s');hidden[s]=!hidden[s];var gs=svg.querySelectorAll('.plt-s[data-s=\''+s+'\']');for(var k=0;k<gs.length;k++)gs[k].style.display=hidden[s]?'none':'';it.style.opacity=hidden[s]?0.35:1;hide();});})(items[j]);}})();
 //]]></script>
 </svg>
 <figcaption><strong>Figure 5:</strong> Correlation matrix of the features and the outcome (training split).</figcaption>
@@ -1847,12 +1798,10 @@ total parameters: 289</code></pre>
         xs = x toArray
         ys = y toArray
         correct = 0
-        i = 0
-        { i &lt; xs size } whileTrue {
+        xs size times { |i|
             p = net predict(xs at(i))
             guess = ((p at(0)) &gt;= 0.5) ifTrue { 1 } ifFalse { 0 }
             (guess == ((ys at(i)) at(0))) ifTrue { correct = correct + 1 }
-            i = i + 1
         }
         (correct * 1.0) / xs size
     }
@@ -1884,7 +1833,7 @@ Test accuracy:       77.92207%</code></pre>
     Plot learningCurve(history)
     Plot title(&quot;Learning curve&quot;)</code></pre>
 <figure id="fig-learn">
-<svg id="plt169be043c5c3" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="640" height="480" viewBox="0 0 640 480" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
+<svg id="plt7be8b670be1c" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="640" height="480" viewBox="0 0 640 480" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
 <rect width="100%" height="100%" fill="#ffffff"/>
 <line x1="79.75" y1="37.5" x2="79.75" y2="425.14" fill="none" stroke="#b0b0b0" stroke-width="1.11" opacity="0.5"/>
 <line x1="160.63" y1="37.5" x2="160.63" y2="425.14" fill="none" stroke="#b0b0b0" stroke-width="1.11" opacity="0.5"/>
@@ -1964,7 +1913,7 @@ Test accuracy:       77.92207%</code></pre>
 <text x="500.65" y="103.61" font-size="13.89">best epoch (54)</text>
 </g>
 <script type="text/javascript">//<![CDATA[
-(function(){var svg=document.getElementById("plt169be043c5c3");if(!svg)return;var D={a:[[62.37,37.5,560.46,387.64]],t:[[0,0,1,87.84,55.12,["train","epoch: 1","loss: 1.047"],"#1f77b4"],
+(function(){var svg=document.getElementById("plt7be8b670be1c");if(!svg)return;var D={a:[[62.37,37.5,560.46,387.64]],t:[[0,0,1,87.84,55.12,["train","epoch: 1","loss: 1.047"],"#1f77b4"],
 [0,0,1,95.93,148.47,["train","epoch: 2","loss: 0.8786"],"#1f77b4"],
 [0,0,1,104.02,210.08,["train","epoch: 3","loss: 0.7674"],"#1f77b4"],
 [0,0,1,112.1,247.82,["train","epoch: 4","loss: 0.6993"],"#1f77b4"],
@@ -2108,21 +2057,19 @@ fp = 0
 fn = 0
 tp = 0
 
-k = 0
-{ k &lt; test_probs size } whileTrue {
+test_probs size times { |k|
     guess = (((test_probs at(k)) at(0)) &gt;= 0.5) ifTrue { 1 } ifFalse { 0 }
     actual = (test_truth at(k)) at(0)
     ((actual == 0) &amp;&amp; (guess == 0)) ifTrue { tn = tn + 1 }
     ((actual == 0) &amp;&amp; (guess == 1)) ifTrue { fp = fp + 1 }
     ((actual == 1) &amp;&amp; (guess == 0)) ifTrue { fn = fn + 1 }
     ((actual == 1) &amp;&amp; (guess == 1)) ifTrue { tp = tp + 1 }
-    k = k + 1
 }
 
 Plot figure(#{figsize: [4.5, 4]})
 Plot confusionMatrix([[tn, fp], [fn, tp]], #{labels: [&quot;No diabetes&quot;, &quot;Diabetes&quot;], title: &quot;Test set&quot;})</code></pre>
 <figure id="fig-confusion">
-<svg id="pltea01a1b607ae" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="450" height="400" viewBox="0 0 450 400" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
+<svg id="plta28e0208b383" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="450" height="400" viewBox="0 0 450 400" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
 <rect width="100%" height="100%" fill="#ffffff"/>
 <clipPath id="clip1"><rect x="123.35" y="62.53" width="257.58" height="257.58"/></clipPath>
 <g clip-path="url(#clip1)">
@@ -2162,7 +2109,7 @@ Plot confusionMatrix([[tn, fp], [fn, tp]], #{labels: [&quot;No diabetes&quot;, &
 <line x1="414.27" y1="68.81" x2="419.13" y2="68.81" fill="none" stroke="#000000" stroke-width="1.11"/>
 <text x="423.99" y="73.81" font-size="13.89">40</text>
 <script type="text/javascript">//<![CDATA[
-(function(){var svg=document.getElementById("pltea01a1b607ae");if(!svg)return;var D={a:[[123.35,62.53,257.58,257.58]],t:[[2,0,1,123.35,62.53,257.58,257.58,2,2,0,[41,5,12,19],"",["No diabetes","Diabetes"],["No diabetes","Diabetes"]]]},FS=13.89,R=13.89;var NS='http://www.w3.org/2000/svg',hidden={};function mk(n,a){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);return e;}var hl=mk('g',{'pointer-events':'none'}),tip=mk('g',{'pointer-events':'none'});var box=mk('rect',{rx:3,ry:3,fill:'#ffffff','fill-opacity':0.95,stroke:'#999999','stroke-width':1});var txt=mk('text',{'font-size':FS,fill:'#222222'});tip.appendChild(box);tip.appendChild(txt);tip.style.display='none';svg.appendChild(hl);svg.appendChild(tip);function fmt(v){if(v===null||v===undefined)return '-';var a=Math.abs(v);if(a!==0&&(a>=1e6||a<1e-4))return v.toExponential(3);return String(Number(v.toPrecision(4)));}function at(e){var p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(svg.getScreenCTM().inverse());}function inAx(x,y){for(var i=D.a.length-1;i>=0;i--){var b=D.a[i];if(x>=b[0]&&x<=b[0]+b[2]&&y>=b[1]&&y<=b[1]+b[3])return i;}return -1;}function find(x,y){var ax=inAx(x,y);if(ax<0)return null;var best=null,bd=R*R,hit=null,i,t;for(i=0;i<D.t.length;i++){t=D.t[i];if(t[1]!==ax||hidden[t[2]])continue;if(t[0]===0){var dx=t[3]-x,dy=t[4]-y,d=dx*dx+dy*dy;if(d<=bd){bd=d;best={x:t[3],y:t[4],lines:t[5],c:t[6],k:'p'};}}else if(t[0]===1){if(x>=t[3]&&x<=t[3]+t[5]&&y>=t[4]&&y<=t[4]+t[6])hit={x:t[3],y:t[4],w:t[5],h:t[6],lines:t[7],c:t[8],k:'r'};}else if(t[0]===3){var ex=x-t[3],ey=t[4]-y,r=Math.sqrt(ex*ex+ey*ey);if(r>=t[5]&&r<=t[6]){var a=Math.atan2(ey,ex)*180/Math.PI,lo=Math.min(t[7],t[8]),hi=Math.max(t[7],t[8]);while(a<lo)a+=360;while(a>lo+360)a-=360;if(a<=hi)hit={x:x,y:y,lines:t[9],c:t[10],k:'w'};}}else if(t[0]===2&&!hit){if(x>=t[3]&&x<t[3]+t[5]&&y>=t[4]&&y<t[4]+t[6]){var cw=t[5]/t[8],ch=t[6]/t[7],c=Math.floor((x-t[3])/cw),rr=Math.floor((y-t[4])/ch),row=t[9]?t[7]-1-rr:rr;var v=t[10][row*t[8]+c],ls=[t[11]];ls.push((t[12]?t[12][row]:'row '+row)+', '+(t[13]?t[13][c]:'column '+c));ls.push('value: '+fmt(v));hit={x:t[3]+c*cw,y:t[4]+rr*ch,w:cw,h:ch,lines:ls,c:'#000000',k:'r'};}}}return best||hit;}function hide(){tip.style.display='none';while(hl.firstChild)hl.removeChild(hl.firstChild);}function show(h,x,y){while(hl.firstChild)hl.removeChild(hl.firstChild);if(h.k==='p')hl.appendChild(mk('circle',{cx:h.x,cy:h.y,r:FS*0.45,fill:'none',stroke:h.c||'#000000','stroke-width':2}));if(h.k==='r')hl.appendChild(mk('rect',{x:h.x,y:h.y,width:h.w,height:h.h,fill:'none',stroke:'#000000','stroke-width':1.5,'stroke-opacity':0.6}));while(txt.firstChild)txt.removeChild(txt.firstChild);var n=0;for(var i=0;i<h.lines.length;i++){var l=h.lines[i];if(l===''||l===null)continue;var s=mk('tspan',{x:0,dy:n===0?0:FS*1.25});if(i===0&&h.lines.length>1)s.setAttribute('font-weight','bold');s.textContent=l;txt.appendChild(s);n++;}if(n===0){hide();return;}tip.style.display='';var b=txt.getBBox(),p=FS*0.4;box.setAttribute('x',b.x-p);box.setAttribute('y',b.y-p);box.setAttribute('width',b.width+2*p);box.setAttribute('height',b.height+2*p);var W=svg.viewBox.baseVal.width,H=svg.viewBox.baseVal.height,tx=x+FS,ty=y+FS*1.5;if(tx+b.width+2*p>W)tx=x-FS-b.width-p;if(ty+b.height+p>H)ty=y-b.height-FS*0.5;if(tx<p)tx=p;if(ty<FS)ty=FS;tip.setAttribute('transform','translate('+tx+','+ty+')');}svg.addEventListener('mousemove',function(e){var p=at(e),h=find(p.x,p.y);if(h)show(h,p.x,p.y);else hide();});svg.addEventListener('mouseleave',hide);var items=svg.querySelectorAll('.plt-l');for(var j=0;j<items.length;j++){(function(it){it.addEventListener('click',function(){var s=it.getAttribute('data-s');hidden[s]=!hidden[s];var gs=svg.querySelectorAll('.plt-s[data-s=\''+s+'\']');for(var k=0;k<gs.length;k++)gs[k].style.display=hidden[s]?'none':'';it.style.opacity=hidden[s]?0.35:1;hide();});})(items[j]);}})();
+(function(){var svg=document.getElementById("plta28e0208b383");if(!svg)return;var D={a:[[123.35,62.53,257.58,257.58]],t:[[2,0,1,123.35,62.53,257.58,257.58,2,2,0,[41,5,12,19],"",["No diabetes","Diabetes"],["No diabetes","Diabetes"]]]},FS=13.89,R=13.89;var NS='http://www.w3.org/2000/svg',hidden={};function mk(n,a){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);return e;}var hl=mk('g',{'pointer-events':'none'}),tip=mk('g',{'pointer-events':'none'});var box=mk('rect',{rx:3,ry:3,fill:'#ffffff','fill-opacity':0.95,stroke:'#999999','stroke-width':1});var txt=mk('text',{'font-size':FS,fill:'#222222'});tip.appendChild(box);tip.appendChild(txt);tip.style.display='none';svg.appendChild(hl);svg.appendChild(tip);function fmt(v){if(v===null||v===undefined)return '-';var a=Math.abs(v);if(a!==0&&(a>=1e6||a<1e-4))return v.toExponential(3);return String(Number(v.toPrecision(4)));}function at(e){var p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(svg.getScreenCTM().inverse());}function inAx(x,y){for(var i=D.a.length-1;i>=0;i--){var b=D.a[i];if(x>=b[0]&&x<=b[0]+b[2]&&y>=b[1]&&y<=b[1]+b[3])return i;}return -1;}function find(x,y){var ax=inAx(x,y);if(ax<0)return null;var best=null,bd=R*R,hit=null,i,t;for(i=0;i<D.t.length;i++){t=D.t[i];if(t[1]!==ax||hidden[t[2]])continue;if(t[0]===0){var dx=t[3]-x,dy=t[4]-y,d=dx*dx+dy*dy;if(d<=bd){bd=d;best={x:t[3],y:t[4],lines:t[5],c:t[6],k:'p'};}}else if(t[0]===1){if(x>=t[3]&&x<=t[3]+t[5]&&y>=t[4]&&y<=t[4]+t[6])hit={x:t[3],y:t[4],w:t[5],h:t[6],lines:t[7],c:t[8],k:'r'};}else if(t[0]===3){var ex=x-t[3],ey=t[4]-y,r=Math.sqrt(ex*ex+ey*ey);if(r>=t[5]&&r<=t[6]){var a=Math.atan2(ey,ex)*180/Math.PI,lo=Math.min(t[7],t[8]),hi=Math.max(t[7],t[8]);while(a<lo)a+=360;while(a>lo+360)a-=360;if(a<=hi)hit={x:x,y:y,lines:t[9],c:t[10],k:'w'};}}else if(t[0]===2&&!hit){if(x>=t[3]&&x<t[3]+t[5]&&y>=t[4]&&y<t[4]+t[6]){var cw=t[5]/t[8],ch=t[6]/t[7],c=Math.floor((x-t[3])/cw),rr=Math.floor((y-t[4])/ch),row=t[9]?t[7]-1-rr:rr;var v=t[10][row*t[8]+c],ls=[t[11]];ls.push((t[12]?t[12][row]:'row '+row)+', '+(t[13]?t[13][c]:'column '+c));ls.push('value: '+fmt(v));hit={x:t[3]+c*cw,y:t[4]+rr*ch,w:cw,h:ch,lines:ls,c:'#000000',k:'r'};}}}return best||hit;}function hide(){tip.style.display='none';while(hl.firstChild)hl.removeChild(hl.firstChild);}function show(h,x,y){while(hl.firstChild)hl.removeChild(hl.firstChild);if(h.k==='p')hl.appendChild(mk('circle',{cx:h.x,cy:h.y,r:FS*0.45,fill:'none',stroke:h.c||'#000000','stroke-width':2}));if(h.k==='r')hl.appendChild(mk('rect',{x:h.x,y:h.y,width:h.w,height:h.h,fill:'none',stroke:'#000000','stroke-width':1.5,'stroke-opacity':0.6}));while(txt.firstChild)txt.removeChild(txt.firstChild);var n=0;for(var i=0;i<h.lines.length;i++){var l=h.lines[i];if(l===''||l===null)continue;var s=mk('tspan',{x:0,dy:n===0?0:FS*1.25});if(i===0&&h.lines.length>1)s.setAttribute('font-weight','bold');s.textContent=l;txt.appendChild(s);n++;}if(n===0){hide();return;}tip.style.display='';var b=txt.getBBox(),p=FS*0.4;box.setAttribute('x',b.x-p);box.setAttribute('y',b.y-p);box.setAttribute('width',b.width+2*p);box.setAttribute('height',b.height+2*p);var W=svg.viewBox.baseVal.width,H=svg.viewBox.baseVal.height,tx=x+FS,ty=y+FS*1.5;if(tx+b.width+2*p>W)tx=x-FS-b.width-p;if(ty+b.height+p>H)ty=y-b.height-FS*0.5;if(tx<p)tx=p;if(ty<FS)ty=FS;tip.setAttribute('transform','translate('+tx+','+ty+')');}svg.addEventListener('mousemove',function(e){var p=at(e),h=find(p.x,p.y);if(h)show(h,p.x,p.y);else hide();});svg.addEventListener('mouseleave',hide);var items=svg.querySelectorAll('.plt-l');for(var j=0;j<items.length;j++){(function(it){it.addEventListener('click',function(){var s=it.getAttribute('data-s');hidden[s]=!hidden[s];var gs=svg.querySelectorAll('.plt-s[data-s=\''+s+'\']');for(var k=0;k<gs.length;k++)gs[k].style.display=hidden[s]?'none':'';it.style.opacity=hidden[s]?0.35:1;hide();});})(items[j]);}})();
 //]]></script>
 </svg>
 <figcaption><strong>Figure 7:</strong> Confusion matrix on the test split (rows: actual, columns: predicted).</figcaption>
@@ -2175,7 +2122,7 @@ test_labels = test_truth map { |r| r at(0) }
 Plot figure(#{figsize: [5, 4.5]})
 roc_result = Plot roc(test_scores, test_labels, #{chance: true, title: &quot;ROC curve&quot;})</code></pre>
 <figure id="fig-roc">
-<svg id="plt787d921210d1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="500" height="450" viewBox="0 0 500 450" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
+<svg id="plt95dbc9c46f2a" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="500" height="450" viewBox="0 0 500 450" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
 <rect width="100%" height="100%" fill="#ffffff"/>
 <line x1="62.37" y1="37.5" x2="62.37" y2="395.14" fill="none" stroke="#b0b0b0" stroke-width="1.11" opacity="0.5"/>
 <line x1="146.02" y1="37.5" x2="146.02" y2="395.14" fill="none" stroke="#b0b0b0" stroke-width="1.11" opacity="0.5"/>
@@ -2241,7 +2188,7 @@ roc_result = Plot roc(test_scores, test_labels, #{chance: true, title: &quot;ROC
 <text x="394.58" y="380.69" font-size="13.89">chance</text>
 </g>
 <script type="text/javascript">//<![CDATA[
-(function(){var svg=document.getElementById("plt787d921210d1");if(!svg)return;var D={a:[[62.37,37.5,418.26,357.64]],t:[[0,0,1,62.37,395.14,["AUC 0.886","false positive rate: 0","true positive rate: 0"],"#1f77b4"],
+(function(){var svg=document.getElementById("plt95dbc9c46f2a");if(!svg)return;var D={a:[[62.37,37.5,418.26,357.64]],t:[[0,0,1,62.37,395.14,["AUC 0.886","false positive rate: 0","true positive rate: 0"],"#1f77b4"],
 [0,0,1,62.37,383.83,["AUC 0.886","false positive rate: 0","true positive rate: 0.03226"],"#1f77b4"],
 [0,0,1,62.37,372.52,["AUC 0.886","false positive rate: 0","true positive rate: 0.06452"],"#1f77b4"],
 [0,0,1,71.46,372.52,["AUC 0.886","false positive rate: 0.02174","true positive rate: 0.06452"],"#1f77b4"],
@@ -2329,10 +2276,8 @@ roc_result = Plot roc(test_scores, test_labels, #{chance: true, title: &quot;ROC
 <p><a href="#fig-probs">Figure 9</a> splits the test predictions by true outcome. A good model pushes the two groups to opposite ends; the overlap in the middle is where the errors come from, and it is why moving the threshold away from 0.5 trades false negatives for false positives.</p>
 <pre class="code"><code class="language-clay">probs_neg = []
 probs_pos = []
-k = 0
-{ k &lt; test_scores size } whileTrue {
+test_scores size times { |k|
     ((test_labels at(k)) == 1) ifTrue { probs_pos push(test_scores at(k)) } ifFalse { probs_neg push(test_scores at(k)) }
-    k = k + 1
 }
 Plot figure(#{figsize: [6, 3.5]})
 Plot hist(probs_neg, 10, #{range: [0, 1], color: &quot;steelblue&quot;, alpha: 0.6, label: &quot;No diabetes&quot;})
@@ -2343,7 +2288,7 @@ Plot ylabel(&quot;Patients&quot;)
 Plot legend
 Plot title(&quot;Predicted probabilities&quot;)</code></pre>
 <figure id="fig-probs">
-<svg id="plt31792969b8bc" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="600" height="350" viewBox="0 0 600 350" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
+<svg id="plt254dd7ea0789" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="600" height="350" viewBox="0 0 600 350" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
 <rect width="100%" height="100%" fill="#ffffff"/>
 <clipPath id="clip1"><rect x="71.2" y="37.5" width="509.42" height="257.64"/></clipPath>
 <g clip-path="url(#clip1)">
@@ -2422,7 +2367,7 @@ Plot title(&quot;Predicted probabilities&quot;)</code></pre>
 <text x="485.05" y="82.78" font-size="13.89">Diabetes</text>
 </g>
 <script type="text/javascript">//<![CDATA[
-(function(){var svg=document.getElementById("plt31792969b8bc");if(!svg)return;var D={a:[[71.2,37.5,509.42,257.64]],t:[[1,0,1,94.36,49.77,46.31,245.37,["No diabetes","Predicted probability: 0 to 0.1","Patients: 18"],"#4682b4"],
+(function(){var svg=document.getElementById("plt254dd7ea0789");if(!svg)return;var D={a:[[71.2,37.5,509.42,257.64]],t:[[1,0,1,94.36,49.77,46.31,245.37,["No diabetes","Predicted probability: 0 to 0.1","Patients: 18"],"#4682b4"],
 [1,0,1,140.67,172.45,46.31,122.69,["No diabetes","Predicted probability: 0.1 to 0.2","Patients: 9"],"#4682b4"],
 [1,0,1,186.98,267.88,46.31,27.26,["No diabetes","Predicted probability: 0.2 to 0.3","Patients: 2"],"#4682b4"],
 [1,0,1,233.29,199.72,46.31,95.42,["No diabetes","Predicted probability: 0.3 to 0.4","Patients: 7"],"#4682b4"],
@@ -2455,29 +2400,21 @@ imp_base = accuracy(x_test, y_test)
 imp_shifts = [7, 19, 31, 43]
 
 imp_drops = []
-f = 0
-{ f &lt; feature_count } whileTrue {
+feature_count times { |f|
     total = 0
-    s = 0
-    { s &lt; imp_shifts size } whileTrue {
+    imp_shifts each { |shift|
         shifted = []
-        r = 0
-        { r &lt; imp_n } whileTrue {
+        imp_n times { |r|
             row = []
-            c = 0
-            { c &lt; feature_count } whileTrue {
-                src = (c == f) ifTrue { (r + (imp_shifts at(s))) % imp_n } ifFalse { r }
+            feature_count times { |c|
+                src = (c == f) ifTrue { (r + shift) % imp_n } ifFalse { r }
                 row push((imp_rows at(src)) at(c))
-                c = c + 1
             }
             shifted push(row)
-            r = r + 1
         }
         total = total + (imp_base - accuracy(AnnData fromArray(shifted), y_test))
-        s = s + 1
     }
     imp_drops push(total / imp_shifts size)
-    f = f + 1
 }
 
 Plot figure(#{figsize: [6, 4]})
@@ -2485,7 +2422,7 @@ Plot barh(features, imp_drops, #{color: &quot;steelblue&quot;})
 Plot xlabel(&quot;Drop in accuracy&quot;)
 Plot title(&quot;Permutation importance&quot;)</code></pre>
 <figure id="fig-importance">
-<svg id="plt19ddddffbd75" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="600" height="400" viewBox="0 0 600 400" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
+<svg id="pltd5a6bf55f2e2" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="600" height="400" viewBox="0 0 600 400" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
 <rect width="100%" height="100%" fill="#ffffff"/>
 <clipPath id="clip1"><rect x="78.47" y="37.5" width="497.74" height="307.64"/></clipPath>
 <g clip-path="url(#clip1)">
@@ -2533,7 +2470,7 @@ Plot title(&quot;Permutation importance&quot;)</code></pre>
 <text x="327.34" y="384.86" font-size="13.89" text-anchor="middle">Drop in accuracy</text>
 <text x="327.34" y="25.17" font-size="16.67" text-anchor="middle">Permutation importance</text>
 <script type="text/javascript">//<![CDATA[
-(function(){var svg=document.getElementById("plt19ddddffbd75");if(!svg)return;var D={a:[[78.47,37.5,497.74,307.64]],t:[[1,0,1,214.21,51.48,176.75,28.68,["","y: Preg","Drop in accuracy: 0.08117"],"#4682b4"],
+(function(){var svg=document.getElementById("pltd5a6bf55f2e2");if(!svg)return;var D={a:[[78.47,37.5,497.74,307.64]],t:[[1,0,1,214.21,51.48,176.75,28.68,["","y: Preg","Drop in accuracy: 0.08117"],"#4682b4"],
 [1,0,1,214.21,87.34,339.37,28.68,["","y: Gluc","Drop in accuracy: 0.1558"],"#4682b4"],
 [1,0,1,171.79,123.19,42.42,28.68,["","y: BP","Drop in accuracy: −0.01948"],"#4682b4"],
 [1,0,1,157.65,159.05,56.56,28.68,["","y: Skin","Drop in accuracy: −0.02597"],"#4682b4"],
@@ -2557,7 +2494,7 @@ embed_axs at(0) title(&quot;Input features&quot;)
 embed_axs at(1) embedding(embed_hidden, embed_classes, #{classNames: [&quot;No diabetes&quot;, &quot;Diabetes&quot;], s: 14, alpha: 0.7})
 embed_axs at(1) title(&quot;Last hidden layer&quot;)</code></pre>
 <figure id="fig-embed">
-<svg id="plt4d582e344bac" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="900" height="400" viewBox="0 0 900 400" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
+<svg id="plt399ab63f1b55" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="900" height="400" viewBox="0 0 900 400" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
 <rect width="100%" height="100%" fill="#ffffff"/>
 <clipPath id="clip1"><rect x="67.7" y="37.5" width="370.94" height="307.64"/></clipPath>
 <g clip-path="url(#clip1)">
@@ -2812,7 +2749,7 @@ embed_axs at(1) title(&quot;Last hidden layer&quot;)</code></pre>
 <text x="784.73" y="82.78" font-size="13.89">Diabetes</text>
 </g>
 <script type="text/javascript">//<![CDATA[
-(function(){var svg=document.getElementById("plt4d582e344bac");if(!svg)return;var D={a:[[67.7,37.5,370.94,307.64],[509.36,37.5,370.94,307.64]],t:[[0,0,1,183.47,192.04,["No diabetes","PC1 (29%): −0.5581","PC2 (18%): 0.7338"],"#1f77b4"],
+(function(){var svg=document.getElementById("plt399ab63f1b55");if(!svg)return;var D={a:[[67.7,37.5,370.94,307.64],[509.36,37.5,370.94,307.64]],t:[[0,0,1,183.47,192.04,["No diabetes","PC1 (29%): −0.5581","PC2 (18%): 0.7338"],"#1f77b4"],
 [0,0,1,102.68,255.16,["No diabetes","PC1 (29%): −2.136","PC2 (18%): −0.8909"],"#1f77b4"],
 [0,0,1,118.55,225.15,["No diabetes","PC1 (29%): −1.826","PC2 (18%): −0.1185"],"#1f77b4"],
 [0,0,1,210.8,217.38,["No diabetes","PC1 (29%): −0.02405","PC2 (18%): 0.08144"],"#1f77b4"],
@@ -2980,11 +2917,9 @@ embed_axs at(1) title(&quot;Last hidden layer&quot;)</code></pre>
     score = { |m|
         q_scores = (x_test toArray) map { |row| (m predict(row)) at(0) }
         q_correct = 0
-        k = 0
-        { k &lt; q_scores size } whileTrue {
+        q_scores size times { |k|
             q_guess = ((q_scores at(k)) &gt;= 0.5) ifTrue { 1 } ifFalse { 0 }
             (q_guess == (test_labels at(k))) ifTrue { q_correct = q_correct + 1 }
-            k = k + 1
         }
         [(q_correct * 1.0) / q_scores size, (PlotML rocCurve(q_scores, test_labels)) get(&quot;auc&quot;)]
     }
@@ -3026,8 +2961,7 @@ binary: rounded [0.6883117, 0.6991585], fine-tuned [0.74025977, 0.8274895]</code
 q_pos = [0, 1, 2, 3, 4]
 q_names = [&quot;Accuracy&quot;, &quot;AUC&quot;]
 
-j = 0
-{ j &lt; 2 } whileTrue {
+2 times { |j|
     q_ax = q_axs at(j)
     q_ax bar([0, 1, 1.8, 2.8, 3.8], q_rounded map { |s| s at(j) }, #{width: 0.4, color: &quot;steelblue&quot;, label: &quot;Rounded&quot;})
     q_ax bar([2.2, 3.2, 4.2], [2, 3, 4] map { |i| (q_tuned at(i)) at(j) }, #{width: 0.4, color: &quot;tomato&quot;, label: &quot;Fine-tuned&quot;})
@@ -3038,10 +2972,9 @@ j = 0
         q_ax axhline(0.65, #{color: &quot;gray&quot;, linestyle: &quot;--&quot;})
         q_ax legend(#{fontsize: 8})
     }
-    j = j + 1
 }</code></pre>
 <figure id="fig-quant">
-<svg id="plt9609df3f8c7f" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="900" height="380" viewBox="0 0 900 380" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
+<svg id="plt2eb3eceb0e73" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="900" height="380" viewBox="0 0 900 380" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
 <rect width="100%" height="100%" fill="#ffffff"/>
 <clipPath id="clip1"><rect x="47.09" y="37.5" width="374.01" height="310.56"/></clipPath>
 <g clip-path="url(#clip1)">
@@ -3142,7 +3075,7 @@ j = 0
 <text x="479.03" y="42.5" font-size="13.89" text-anchor="end">1.0</text>
 <text x="675.76" y="25.17" font-size="16.67" text-anchor="middle">AUC</text>
 <script type="text/javascript">//<![CDATA[
-(function(){var svg=document.getElementById("plt9609df3f8c7f");if(!svg)return;var D={a:[[47.09,37.5,374.01,310.56],[488.75,37.5,374.01,310.56]],t:[[1,0,1,64.09,174.63,29.57,483.98,["Rounded","x: float32","y: 0.7792"],"#4682b4"],
+(function(){var svg=document.getElementById("plt2eb3eceb0e73");if(!svg)return;var D={a:[[47.09,37.5,374.01,310.56],[488.75,37.5,374.01,310.56]],t:[[1,0,1,64.09,174.63,29.57,483.98,["Rounded","x: float32","y: 0.7792"],"#4682b4"],
 [1,0,1,138,174.63,29.57,483.98,["Rounded","x: int8","y: 0.7792"],"#4682b4"],
 [1,0,1,197.13,174.63,29.57,483.98,["Rounded","x: 1.8","y: 0.7792"],"#4682b4"],
 [1,0,1,271.05,247.23,29.57,411.39,["Rounded","x: 2.8","y: 0.6623"],"#4682b4"],
