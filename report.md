@@ -560,6 +560,6 @@ q_names = ["Accuracy", "AUC"]
 }
 ```
 
-The int8 network scores the same as the float one: 8 bits are plenty for these weights, so int8 cuts the weights to a quarter of their size for free. int4 also holds up, losing a little AUC when rounded and getting it back with fine-tuning. Ternary and binary weights are a different story: rounded straight after training, they fall to or near the 65% baseline, little better than always answering "no diabetes". Fine-tuning recovers most of the loss, and a fine-tuned binary network keeps an AUC above 0.8 with its hidden weights in just 32 bytes.
+The int8 network scores the same as the float one: 8 bits are plenty for these weights, so int8 cuts the weights to a quarter of their size for free. int4 also holds up, losing a little AUC when rounded and getting it back with fine-tuning. Ternary and binary weights are a different story: rounded straight after training, they fall to or near the 65% baseline, little better than always answering "no diabetes". 
 
-With only 77 test patients, one patient is 1.3 points of accuracy, so differences of a point or two between formats (such as int4 edging out float32) are noise. The large drops before fine-tuning are not.
+Fine-tuning recovers most of the loss, and a fine-tuned binary network keeps an AUC above 0.8 with its hidden weights in just 32 bytes. With only 77 test patients, one patient is 1.3 points of accuracy, so differences of a point or two between formats (such as int4 edging out float32) are noise. The large drops before fine-tuning are not.
