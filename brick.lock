@@ -9,12 +9,12 @@
     "knit": {
       "url": "github.com/mseminatore/clay-knit",
       "version": "latest",
-      "resolved": "41fbf76f97ac44c662d40e5e5df15e0194ef264a"
+      "resolved": "04c206b5c1b8c0a970b9ded8f4182f89e3e619c2"
     },
     "plot": {
-      "url": "github.com/mseminatore/clay-plot@v0.9.3",
-      "version": "v0.9.3",
-      "resolved": "3685a296d0e5d7af7bb3dee91adc3de94fea364b",
+      "url": "github.com/mseminatore/clay-plot@v0.9.4",
+      "version": "v0.9.4",
+      "resolved": "ec5657fe881da469e27b503ea187839ec18aadf7",
       "dependency_of": "knit"
     },
     "pdf": {

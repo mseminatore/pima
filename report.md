@@ -119,7 +119,7 @@ Plot ylabel("Rows with 0")
 Plot title("Missing data by feature")
 ```
 
-The Insulin column is missing the most data with `{clay} zeros at(features indexOf("Insulin"))` empty rows. That represents `{clay} (zeros at(4)) / (data rows)`% of all rows.
+The Insulin column is missing the most data with `{clay} zeros at(features indexOf("Insulin"))` empty rows. That represents `{clay} Math round(zeros at(features indexOf("Insulin")) * 100.0 / (data rows))`% of all rows.
 
 The distribution of each feature (raw, before cleaning) is shown in @fig-hist. The spikes at 0 in Glucose, BloodPressure, SkinThickness, Insulin and BMI are the missing values.
 
