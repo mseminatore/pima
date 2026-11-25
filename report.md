@@ -6,7 +6,7 @@ date: `{clay} Date now format("%m-%d-%Y")`
 
 # Introduction
 
-Thiss a report summarizing a data analysis conducted on the benchmark machine learning
+This is a report summarizing a data analysis conducted on the benchmark machine learning
 dataset used to predict whether a patient has diabetes based on a collection
 of diagnostic measurements. Originally compiled by the National Institute of 
 Diabetes and Digestive and Kidney Diseases (NIDDK), it contains data for **768** 
@@ -25,9 +25,9 @@ This report was generated using the [Clay-knit](https://github.com/mseminatore/c
 
 # The Dataset
 
-The Pima dataset describes the medical records for a sampling of Pima Indians. In addition to a number of featuresand whether or not each patient will have an onset of diabetes within five years.
+The Pima dataset describes the medical records for a sampling of Pima Indians. For each patient it records a number of diagnostic features and whether or not they had an onset of diabetes within five years.
 
-The data contains a total 8 features and one class variable (0: negative and 1: positive for diabetes). The 8 features provided in the dataset include:
+The data contains a total of 8 features and one class variable (0: negative and 1: positive for diabetes). The 8 features provided in the dataset include:
 
 ```clay
 import("ann")
@@ -57,7 +57,7 @@ The units and detailed descriptions of these features are shown in @tbl-features
 | Col | Name | Description |
 |-----|------|-------------|
 |1| preg | Number of times pregnant |
-|2| gluc | Plasma glucose concentration a 2 hours in an oral glucose tolerance test |
+|2| gluc | Plasma glucose concentration 2 hours into an oral glucose tolerance test |
 |3| BP | Diastolic blood pressure (mm Hg) |
 |4| skin | Triceps skin fold thickness (mm) |
 |5| test | 2-Hour serum insulin (mu U/ml) |
@@ -170,7 +170,7 @@ i = 0
 }
 ```
 
-To analyze the dataset, given many missing values, we either need to either drop those rows (losing precious data from such a small dataset), or better, find some way to replace the missing data.
+To analyze the dataset, given many missing values, we need to either drop those rows (losing precious data from such a small dataset), or better, find some way to replace the missing data.
 
 One way to replace, or impute, missing data is to fill empty data columns with the column mean or median. This analysis selected mean.
 
@@ -547,3 +547,82 @@ embed_axs at(0) title("Input features")
 embed_axs at(1) embedding(embed_hidden, embed_classes, #{classNames: ["No diabetes", "Diabetes"], s: 14, alpha: 0.7})
 embed_axs at(1) title("Last hidden layer")
 ```
+
+# Quantization
+
+A model this small is a natural fit for a microcontroller or a phone, where memory and floating-point hardware are scarce. Clay-ann can shrink a trained network in two ways:
+
+- `quantize` makes an **int8** copy of the whole network (weights and activations), so it can run with integer arithmetic alone.
+- `weightFormat` stores the hidden layers' weights in **int4**, **ternary** (2 bits: -1, 0 or +1 times a scale) or **binary** (1 bit: ± a scale). The output layer stays float.
+
+Rounding weights this coarsely loses information, so each low-bit format is tested twice: rounded straight after training, and again after 10 more epochs of *quantization-aware* fine-tuning, in which the network trains through the rounded weights and adjusts to them. Every format starts from a fresh copy of the float network trained above, and is scored on the same 77 held-out test patients by accuracy (threshold 0.5) and by ROC AUC.
+
+```clay
+    // score a model on the test split: [accuracy, AUC]
+    score = { |m|
+        q_scores = (x_test toArray) map { |row| (m predict(row)) at(0) }
+        q_correct = 0
+        k = 0
+        { k < q_scores size } whileTrue {
+            q_guess = ((q_scores at(k)) >= 0.5) ifTrue { 1 } ifFalse { 0 }
+            (q_guess == (test_labels at(k))) ifTrue { q_correct = q_correct + 1 }
+            k = k + 1
+        }
+        [(q_correct * 1.0) / q_scores size, (PlotML rocCurve(q_scores, test_labels)) get("auc")]
+    }
+
+    // the trained float network, saved so each format starts from a copy of it
+    q_path = File tempDir + "/pima-float.net"
+    net save(q_path)
+    q_calib = x_train slice(0, 500)          // rows that set the int8 value ranges
+
+    q_formats = ["float32", "int8", "int4", "ternary", "binary"]
+    q_bits = [32, 8, 4, 2, 1]
+    q_rounded = [score(net), score(net quantize(q_calib))]
+    q_tuned = [nil, nil]
+
+    ["int4", "ternary", "binary"] each { |fmt|
+        m = Ann load(q_path)
+        m weightFormat(fmt)
+        q_rounded push(score(m))
+        m fit(x_train, y_train, #{"epochs": 10})
+        q_tuned push(score(m))
+    }
+    File delete(q_path)
+
+    // weights in the two hidden layers (8x16 and 16x8)
+    q_weights = feature_count * feature_count * 4
+
+    q_formats size times { |i|
+        line = "${q_formats at(i)}: rounded ${q_rounded at(i)}"
+        ((q_tuned at(i)) != nil) ifTrue { line = line + ", fine-tuned ${q_tuned at(i)}" }
+        line println
+    }
+```
+
+@fig-quant compares the formats. The hidden layers hold `{clay} q_weights` weights, so they take `{clay} q_weights * 4` bytes as float32, `{clay} q_weights` as int8, `{clay} q_weights / 2` as int4, `{clay} q_weights / 4` as ternary and only `{clay} q_weights / 8` as binary.
+
+```{clay #fig-quant caption="Test accuracy and AUC by weight format, rounded after training and after quantization-aware fine-tuning. The dashed line on the left is the 65% majority-class baseline."}
+[q_fig, q_axs] = Plot subplots(1, 2, #{figsize: [9, 3.8]})
+q_pos = [0, 1, 2, 3, 4]
+q_names = ["Accuracy", "AUC"]
+
+j = 0
+{ j < 2 } whileTrue {
+    q_ax = q_axs at(j)
+    q_ax bar([0, 1, 1.8, 2.8, 3.8], q_rounded map { |s| s at(j) }, #{width: 0.4, color: "steelblue", label: "Rounded"})
+    q_ax bar([2.2, 3.2, 4.2], [2, 3, 4] map { |i| (q_tuned at(i)) at(j) }, #{width: 0.4, color: "tomato", label: "Fine-tuned"})
+    q_ax xticks(q_pos, q_formats)
+    q_ax ylim(0.5, 1)
+    q_ax title(q_names at(j))
+    (j == 0) ifTrue {
+        q_ax axhline(0.65, #{color: "gray", linestyle: "--"})
+        q_ax legend(#{fontsize: 8})
+    }
+    j = j + 1
+}
+```
+
+The int8 network scores the same as the float one: 8 bits are plenty for these weights, so int8 cuts the weights to a quarter of their size for free. int4 also holds up, losing a little AUC when rounded and getting it back with fine-tuning. Ternary and binary weights are a different story: rounded straight after training, they fall to or near the 65% baseline, little better than always answering "no diabetes". Fine-tuning recovers most of the loss, and a fine-tuned binary network keeps an AUC above 0.8 with its hidden weights in just 32 bytes.
+
+With only 77 test patients, one patient is 1.3 points of accuracy, so differences of a point or two between formats (such as int4 edging out float32) are noise. The large drops before fine-tuning are not.
