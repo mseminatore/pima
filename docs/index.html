@@ -32,20 +32,23 @@ hr{border:none;border-top:1px solid #c0c0c0;margin:2em 0}.missing{color:#aa0000;
 <header>
 <h1 class="title">An Analysis of the Pima Indian Diabetes Dataset</h1>
 <p class="author">Mark Seminatore</p>
-<p class="date">11-24-2026</p>
+<p class="date">11-25-2026</p>
 </header>
 <h1 id="introduction">Introduction</h1>
-<p>This is a report summarizing a data analysis conducted on the benchmark machine learning dataset used to predict whether a patient has diabetes based on a collection of diagnostic measurements. Originally compiled by the National Institute of Diabetes and Digestive and Kidney Diseases (NIDDK), it contains data for <strong>768</strong> female patients aged 21 and older of Pima Indian heritage living near Phoenix, Arizona.</p>
+<p>This is a report summarizing a data analysis conducted on a benchmark machine learning dataset used to predict whether a patient has diabetes based on a collection of diagnostic measurements. Originally compiled by the National Institute of Diabetes and Digestive and Kidney Diseases (NIDDK), it contains data for <strong>768</strong> female patients, aged 21 and older, of Pima Indian heritage living near Phoenix, Arizona.</p>
 <blockquote><p>Note: The dataset for this analysis was sourced from <a href="https://www.kaggle.com/datasets/kumargh/pimaindiansdiabetescsv">Kaggle.com</a>.</p></blockquote>
 <h1 id="analysis-tools">Analysis Tools</h1>
-<p>This analysis was conducted using a NN model written in the <a href="https://github.com/mseminatore/clay">Clay</a> programming language. Clay is a new prototype-based, pure Object-Oriented language. It runs interpretively like Python and thus allows for rapid analysis of data. Like Python, it has a growing collection of packages (called bricks) that are useful for data analysis. The Clay language shares many traits with Smalltalk and Io.</p>
-<p>A Clay &quot;brick&quot; (a package) called <a href="https://github.com/mseminatore/clay-ann">Clay-ann</a> provided the NN framework. Clay-ann is a native code brick built on the C neural network library <a href="https://github.com/mseminatore/ann">libann</a>.</p>
-<p>This report was generated using the <a href="https://github.com/mseminatore/clay-knit">Clay-knit</a> brick, which itself uses the <a href="https://github.com/mseminatore/clay-pdf">Clay-pdf</a> and <a href="https://github.com/mseminatore/clay-plot">Clay-plot</a> bricks. <code>Knitting</code> reports is a concept inspired by the R programming language where a markdown file contains snippets of code that are intermixed with text narrative. The code is executed in chunks with the output visible and available for generating inline tables and figures.</p>
+<p>The analysis was completed using a Neural Network written in the <a href="https://github.com/mseminatore/clay">Clay</a> programming language. Clay is a new prototype-based, pure Object-Oriented language. It can run interpretively, like Python, but can also compile to native code for distribution and faster execution. This allows for rapid iteration and analysis of data. Clay has a growing collection of packages that are useful for training models and conducting data analysis.</p>
+<blockquote><p>The Clay language shares many traits with Smalltalk and Io.</p></blockquote>
+<p>The Neural Network framework used for this project is called <a href="https://github.com/mseminatore/clay-ann">Clay-ann</a>. Clay-ann is ann add-on <code>brick</code> (a Clay package). Clay-ann is a native code brick that wraps the C artificial neural network library <a href="https://github.com/mseminatore/ann">libann</a>.</p>
+<p>This report was generated using the <a href="https://github.com/mseminatore/clay-knit">Clay-knit</a> brick, which in turn uses the <a href="https://github.com/mseminatore/clay-pdf">Clay-pdf</a> and <a href="https://github.com/mseminatore/clay-plot">Clay-plot</a> bricks. <code>Knitting</code> reports is a concept inspired by the R programming language where a markdown file contains snippets of code that are intermixed with text narrative. The code is executed in chunks with the output visible and available for generating inline tables and figures.</p>
 <h1 id="the-dataset">The Dataset</h1>
 <p>The Pima dataset describes the medical records for a sampling of Pima Indians. For each patient it records a number of diagnostic features and whether or not they had an onset of diabetes within five years.</p>
-<p>The data contains a total of 8 features and one class variable (0: negative and 1: positive for diabetes). The 8 features provided in the dataset include:</p>
-<pre class="code"><code class="language-clay">import(&quot;ann&quot;)
+<p>The dataset contains a total of 8 real-valued features, and one class variable (0: negative and 1: positive for diabetes). Below, we setup the project in Clay, naming the 8 features provided in the dataset:</p>
+<pre class="code"><code class="language-clay">// import the Clay-ann brick
+import(&quot;ann&quot;)
 
+// name the feature columns
 features = [
     &quot;Preg&quot;,
     &quot;Gluc&quot;,
@@ -57,6 +60,7 @@ features = [
     &quot;Age&quot;
 ]
 
+// save the count of features for later
 feature_count = features length
 
 // cols where 0 means &quot;missing&quot;: Glucose, BloodPressure, SkinThickness, 
@@ -64,7 +68,9 @@ feature_count = features length
 // Pedigree/Age are never 0.
 
 missingCols = [1, 2, 3, 4, 5]</code></pre>
-<p>The units and detailed descriptions of these features are shown in <a href="#tbl-features">Table 1</a>. Of these, only the number of pregnancies can validly be <code>0</code>. For all others, a <code>0</code> value marks missing data.</p>
+<p>The units and detailed descriptions of these features are shown in <a href="#tbl-features">Table 1</a> below. Of these, only the number of pregnancies can validly be <code>0</code>. For all others, a <code>0</code> value marks missing data.</p>
+<h2 id="loading-the-dataset">Loading the dataset</h2>
+<p>The complete dataset is quite small and is stored in a single .csv file of approximately 23 KBytes. Feature data is in the first 8 columns. The output class is the 9th column.</p>
 <div class="table" id="tbl-features">
 <p class="caption"><strong>Table 1:</strong> Feature labels.</p>
 <table>
@@ -78,18 +84,20 @@ missingCols = [1, 2, 3, 4, 5]</code></pre>
 <tr><td>6</td><td>BMI</td><td>Body mass index (weight in kg/(height in m)^2)</td></tr>
 <tr><td>7</td><td>pedi</td><td>Diabetes pedigree function</td></tr>
 <tr><td>8</td><td>age</td><td>Age (years)</td></tr>
+<tr><td>9</td><td>class</td><td>0 = no Diabetes, 1 = Diabetes</td></tr>
 </tbody></table></div>
-<h2 id="loading-the-data">Loading the data</h2>
-<p>The complete dataset is small and is stored in a single .csv file of about 23 KBytes. Feature data is in the first 8 columns. The output class is the 9th column.</p>
+<p>We can load the full dataset into a table using just one line of Clay:</p>
 <pre class="code"><code class="language-clay">    // load the Pima dataset
     &quot;Loading Pima dataset...&quot; println
     data = Ann loadCsv(&quot;data/pima-indians-diabetes.csv&quot;)
 
-    feature_count = features length
     &quot;Data loaded with ${data cols} cols and ${data rows} rows&quot; println</code></pre>
 <pre class="output"><code>Loading Pima dataset...
 Data loaded with 9 cols and 768 rows</code></pre>
-<p>The first thing to note from the data is that the two output classes are not evenly balanced. As <a href="#fig-balance">Figure 1</a> shows, there are 500 negative and 268 positive patients. Therefore, a model that always predicted &quot;no diabetes&quot; would already be right about 65% of the time. As a result, the final accuracy should be judged against that baseline.</p>
+<h2 id="explore-dataset-characteristics">Explore dataset characteristics</h2>
+<h3 id="output-class-balance">Output class balance</h3>
+<p>The first thing to note from the data is how well the two output classes are balanced. A significant imbalance in training examples can skew the results. As <a href="#fig-balance">Figure 1</a> shows, there are 500 negative and 268 positive patients. Therefore, a model that always predicted &quot;no diabetes&quot; would already be right about 65% of the time in predicting test results. As a result, the final accuracy should be judged against that baseline. Specifically, a trained model must exceed 65% accuracy to demonstrate meaningful learning of data signals</p>
+<p>Below are the few lines of Clay code required to generate an output class histrogram.</p>
 <pre class="code"><code class="language-clay">class_counts = [0, 0]
 
 data toArray each { |row|
@@ -105,10 +113,10 @@ Plot barLabel(class_bars, #{fmt: &quot;%d&quot;})
 Plot ylabel(&quot;Patients&quot;)
 Plot title(&quot;Classes are not balanced&quot;)</code></pre>
 <figure id="fig-balance">
-<svg id="plt533151cfcfd4" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="400" height="350" viewBox="0 0 400 350" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
+<svg id="pltf25fd90e6a51" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="400" height="350" viewBox="0 0 400 350" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
 <rect width="100%" height="100%" fill="#ffffff"/>
-<clipPath id="clip457fe16a-1"><rect x="66.79" y="37.5" width="294.05" height="280.56"/></clipPath>
-<g clip-path="url(#clip457fe16a-1)">
+<clipPath id="clip3aa6f76f-1"><rect x="66.79" y="37.5" width="294.05" height="280.56"/></clipPath>
+<g clip-path="url(#clip3aa6f76f-1)">
 <g class="plt-s" data-s="1">
 <rect x="80.15" y="50.86" width="118.81" height="267.2" fill="#4682b4"/>
 <rect x="228.67" y="174.84" width="118.81" height="143.22" fill="#ff6347"/>
@@ -139,14 +147,16 @@ Plot title(&quot;Classes are not balanced&quot;)</code></pre>
 <text transform="translate(25 177.78) rotate(-90)" y="-3.33" font-size="13.89" text-anchor="middle">Patients</text>
 <text x="213.81" y="25.17" font-size="16.67" text-anchor="middle">Classes are not balanced</text>
 <script type="text/javascript">//<![CDATA[
-(function(){var svg=document.getElementById("plt533151cfcfd4");if(!svg)return;var D={a:[[66.79,37.5,294.05,280.56]],t:[[1,0,1,80.15,50.86,118.81,267.2,["","x: No diabetes","Patients: 500"],"#4682b4"],
+(function(){var svg=document.getElementById("pltf25fd90e6a51");if(!svg)return;var D={a:[[66.79,37.5,294.05,280.56]],t:[[1,0,1,80.15,50.86,118.81,267.2,["","x: No diabetes","Patients: 500"],"#4682b4"],
 [1,0,1,228.67,174.84,118.81,143.22,["","x: Diabetes","Patients: 268"],"#ff6347"]]},FS=13.89,R=13.89;var NS='http://www.w3.org/2000/svg',hidden={};function mk(n,a){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);return e;}var hl=mk('g',{'pointer-events':'none'}),tip=mk('g',{'pointer-events':'none'});var box=mk('rect',{rx:3,ry:3,fill:'#ffffff','fill-opacity':0.95,stroke:'#999999','stroke-width':1});var txt=mk('text',{'font-size':FS,fill:'#222222'});tip.appendChild(box);tip.appendChild(txt);tip.style.display='none';svg.appendChild(hl);svg.appendChild(tip);function fmt(v){if(v===null||v===undefined)return '-';var a=Math.abs(v);if(a!==0&&(a>=1e6||a<1e-4))return v.toExponential(3);return String(Number(v.toPrecision(4)));}function at(e){var p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(svg.getScreenCTM().inverse());}function inAx(x,y){for(var i=D.a.length-1;i>=0;i--){var b=D.a[i];if(x>=b[0]&&x<=b[0]+b[2]&&y>=b[1]&&y<=b[1]+b[3])return i;}return -1;}function find(x,y){var ax=inAx(x,y);if(ax<0)return null;var best=null,bd=R*R,hit=null,i,t;for(i=0;i<D.t.length;i++){t=D.t[i];if(t[1]!==ax||hidden[t[2]])continue;if(t[0]===0){var dx=t[3]-x,dy=t[4]-y,d=dx*dx+dy*dy;if(d<=bd){bd=d;best={x:t[3],y:t[4],lines:t[5],c:t[6],k:'p'};}}else if(t[0]===1){if(x>=t[3]&&x<=t[3]+t[5]&&y>=t[4]&&y<=t[4]+t[6])hit={x:t[3],y:t[4],w:t[5],h:t[6],lines:t[7],c:t[8],k:'r'};}else if(t[0]===3){var ex=x-t[3],ey=t[4]-y,r=Math.sqrt(ex*ex+ey*ey);if(r>=t[5]&&r<=t[6]){var a=Math.atan2(ey,ex)*180/Math.PI,lo=Math.min(t[7],t[8]),hi=Math.max(t[7],t[8]);while(a<lo)a+=360;while(a>lo+360)a-=360;if(a<=hi)hit={x:x,y:y,lines:t[9],c:t[10],k:'w'};}}else if(t[0]===2&&!hit){if(x>=t[3]&&x<t[3]+t[5]&&y>=t[4]&&y<t[4]+t[6]){var cw=t[5]/t[8],ch=t[6]/t[7],c=Math.floor((x-t[3])/cw),rr=Math.floor((y-t[4])/ch),row=t[9]?t[7]-1-rr:rr;var v=t[10][row*t[8]+c],ls=[t[11]];ls.push((t[12]?t[12][row]:'row '+row)+', '+(t[13]?t[13][c]:'column '+c));ls.push('value: '+fmt(v));hit={x:t[3]+c*cw,y:t[4]+rr*ch,w:cw,h:ch,lines:ls,c:'#000000',k:'r'};}}}return best||hit;}function hide(){tip.style.display='none';while(hl.firstChild)hl.removeChild(hl.firstChild);}function show(h,x,y){while(hl.firstChild)hl.removeChild(hl.firstChild);if(h.k==='p')hl.appendChild(mk('circle',{cx:h.x,cy:h.y,r:FS*0.45,fill:'none',stroke:h.c||'#000000','stroke-width':2}));if(h.k==='r')hl.appendChild(mk('rect',{x:h.x,y:h.y,width:h.w,height:h.h,fill:'none',stroke:'#000000','stroke-width':1.5,'stroke-opacity':0.6}));while(txt.firstChild)txt.removeChild(txt.firstChild);var n=0;for(var i=0;i<h.lines.length;i++){var l=h.lines[i];if(l===''||l===null)continue;var s=mk('tspan',{x:0,dy:n===0?0:FS*1.25});if(i===0&&h.lines.length>1)s.setAttribute('font-weight','bold');s.textContent=l;txt.appendChild(s);n++;}if(n===0){hide();return;}tip.style.display='';var b=txt.getBBox(),p=FS*0.4;box.setAttribute('x',b.x-p);box.setAttribute('y',b.y-p);box.setAttribute('width',b.width+2*p);box.setAttribute('height',b.height+2*p);var W=svg.viewBox.baseVal.width,H=svg.viewBox.baseVal.height,tx=x+FS,ty=y+FS*1.5;if(tx+b.width+2*p>W)tx=x-FS-b.width-p;if(ty+b.height+p>H)ty=y-b.height-FS*0.5;if(tx<p)tx=p;if(ty<FS)ty=FS;tip.setAttribute('transform','translate('+tx+','+ty+')');}svg.addEventListener('mousemove',function(e){var p=at(e),h=find(p.x,p.y);if(h)show(h,p.x,p.y);else hide();});svg.addEventListener('mouseleave',hide);var items=svg.querySelectorAll('.plt-l');for(var j=0;j<items.length;j++){(function(it){it.addEventListener('click',function(){var s=it.getAttribute('data-s');hidden[s]=!hidden[s];var gs=svg.querySelectorAll('.plt-s[data-s=\''+s+'\']');for(var k=0;k<gs.length;k++)gs[k].style.display=hidden[s]?'none':'';it.style.opacity=hidden[s]?0.35:1;hide();});})(items[j]);}})();
 //]]></script>
 </svg>
 <figcaption><strong>Figure 1:</strong> Number of patients in each class.</figcaption>
 </figure>
-<h2 id="cleaning-the-data">Cleaning the data</h2>
-<p>As <a href="#fig-zeros">Figure 2</a> below clearly demonstrates, there are a number of missing data entries. These missing entries must be dealt with before training to avoid skewing the results.</p>
+<h3 id="check-for-missing-data">Check for missing data</h3>
+<p>The next step in analyzing a dataset is to check for missing (or malformed) data. Missing data might be zero/nan/inf values, empty strings, or null values. Training with missing data can skew results and even cause crashes. A visual inspection of this small dataset shows missing values marked by zero values.</p>
+<blockquote><p>Note: A larger dataset would require a more in-depth scan of the data for missing or invalid entries.</p></blockquote>
+<p>Given this, another few lines of Clay code provides a histogram of missing values by feature:</p>
 <pre class="code"><code class="language-clay">rows = data toArray
 zeros = features map { |name| 0 }
 
@@ -162,10 +172,10 @@ Plot barLabel(bars, #{fmt: &quot;%d&quot;})
 Plot ylabel(&quot;Rows with 0&quot;)
 Plot title(&quot;Missing data by feature&quot;)</code></pre>
 <figure id="fig-zeros">
-<svg id="plt2ad82eaf9fa8" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="700" height="350" viewBox="0 0 700 350" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
+<svg id="plt24c9979ce9d4" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="700" height="350" viewBox="0 0 700 350" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
 <rect width="100%" height="100%" fill="#ffffff"/>
-<clipPath id="clip09541ef4-1"><rect x="66.79" y="37.5" width="611.45" height="280.56"/></clipPath>
-<g clip-path="url(#clip09541ef4-1)">
+<clipPath id="clip2389d753-1"><rect x="66.79" y="37.5" width="611.45" height="280.56"/></clipPath>
+<g clip-path="url(#clip2389d753-1)">
 <g class="plt-s" data-s="1">
 <rect x="94.58" y="238.75" width="57.01" height="79.3" fill="#4682b4"/>
 <rect x="165.84" y="314.48" width="57.01" height="3.57" fill="#4682b4"/>
@@ -224,7 +234,7 @@ Plot title(&quot;Missing data by feature&quot;)</code></pre>
 <text transform="translate(25 177.78) rotate(-90)" y="-3.33" font-size="13.89" text-anchor="middle">Rows with 0</text>
 <text x="372.51" y="25.17" font-size="16.67" text-anchor="middle">Missing data by feature</text>
 <script type="text/javascript">//<![CDATA[
-(function(){var svg=document.getElementById("plt2ad82eaf9fa8");if(!svg)return;var D={a:[[66.79,37.5,611.45,280.56]],t:[[1,0,1,94.58,238.75,57.01,79.3,["","x: Preg","Rows with 0: 111"],"#4682b4"],
+(function(){var svg=document.getElementById("plt24c9979ce9d4");if(!svg)return;var D={a:[[66.79,37.5,611.45,280.56]],t:[[1,0,1,94.58,238.75,57.01,79.3,["","x: Preg","Rows with 0: 111"],"#4682b4"],
 [1,0,1,165.84,314.48,57.01,3.57,["","x: Gluc","Rows with 0: 5"],"#4682b4"],
 [1,0,1,237.11,293.05,57.01,25,["","x: BP","Rows with 0: 35"],"#4682b4"],
 [1,0,1,308.37,155.88,57.01,162.17,["","x: Skin","Rows with 0: 227"],"#4682b4"],
@@ -236,8 +246,12 @@ Plot title(&quot;Missing data by feature&quot;)</code></pre>
 </svg>
 <figcaption><strong>Figure 2:</strong> Number of 0 entries in each feature column.</figcaption>
 </figure>
-<p>The Insulin column is missing the most data with 374 empty rows. That represents 49% of all rows.</p>
-<p>The distribution of each feature (raw, before cleaning) is shown in <a href="#fig-hist">Figure 3</a>. The spikes at 0 in Glucose, BloodPressure, SkinThickness, Insulin and BMI are the missing values.</p>
+<p>As <a href="#fig-zeros">Figure 2</a> below demonstrates, there are a number of missing data entries. These missing entries must be dealt with before training to avoid skewing the results.</p>
+<p>This shows that the Insulin column is missing the most data with 374 empty rows. That represents 49% of all rows. We can also see that Skin thickness is also missing 227 rows of data.</p>
+<h3 id="feature-space-distribution">Feature space distribution</h3>
+<p>It is also useful to have an understanding of the overall data distribution of each feature. A feature data histogram (raw, before cleaning) is shown in <a href="#fig-hist">Figure 3</a>.</p>
+<blockquote><p>Note: The spikes at 0 in Glucose, BloodPressure, SkinThickness, Insulin and BMI are the missing values.</p></blockquote>
+<p>Once again, just a few lines of Clay code are required to build this view into the dataset:</p>
 <pre class="code"><code class="language-clay">hist_rows = data toArray
 [hist_fig, hist_axs] = Plot subplots(2, 4, #{figsize: [9, 4.5]})
 
@@ -250,10 +264,10 @@ feature_count times { |i|
     hist_ax title(features at(i), #{fontsize: 9})
 }</code></pre>
 <figure id="fig-hist">
-<svg id="pltaa634b211a32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="900" height="450" viewBox="0 0 900 450" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
+<svg id="plt98281d4f99f5" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="900" height="450" viewBox="0 0 900 450" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
 <rect width="100%" height="100%" fill="#ffffff"/>
-<clipPath id="clip7e6e839b-1"><rect x="51.51" y="39.24" width="157.46" height="155.21"/></clipPath>
-<g clip-path="url(#clip7e6e839b-1)">
+<clipPath id="clip0c0538a9-1"><rect x="51.51" y="39.24" width="157.46" height="155.21"/></clipPath>
+<g clip-path="url(#clip0c0538a9-1)">
 <g class="plt-s" data-s="1">
 <rect x="58.67" y="72.91" width="7.16" height="121.54" fill="#4682b4"/>
 <rect x="65.82" y="46.63" width="7.16" height="147.82" fill="#4682b4"/>
@@ -292,8 +306,8 @@ feature_count times { |i|
 <line x1="46.65" y1="84.95" x2="51.51" y2="84.95" fill="none" stroke="#000000" stroke-width="1.11"/>
 <text x="41.79" y="89.95" font-size="13.89" text-anchor="end">100</text>
 <text x="130.24" y="27.9" font-size="12.5" text-anchor="middle">Preg</text>
-<clipPath id="clip7e6e839b-2"><rect x="272.34" y="39.24" width="157.46" height="155.21"/></clipPath>
-<g clip-path="url(#clip7e6e839b-2)">
+<clipPath id="clip0c0538a9-2"><rect x="272.34" y="39.24" width="157.46" height="155.21"/></clipPath>
+<g clip-path="url(#clip0c0538a9-2)">
 <g class="plt-s" data-s="2">
 <rect x="279.5" y="188.13" width="7.16" height="6.32" fill="#4682b4"/>
 <rect x="286.66" y="194.44" width="7.16" height="0" fill="#4682b4"/>
@@ -338,8 +352,8 @@ feature_count times { |i|
 <line x1="267.48" y1="68.1" x2="272.34" y2="68.1" fill="none" stroke="#000000" stroke-width="1.11"/>
 <text x="262.62" y="73.1" font-size="13.89" text-anchor="end">100</text>
 <text x="351.07" y="27.9" font-size="12.5" text-anchor="middle">Gluc</text>
-<clipPath id="clip7e6e839b-3"><rect x="493.18" y="39.24" width="157.46" height="155.21"/></clipPath>
-<g clip-path="url(#clip7e6e839b-3)">
+<clipPath id="clip0c0538a9-3"><rect x="493.18" y="39.24" width="157.46" height="155.21"/></clipPath>
+<g clip-path="url(#clip0c0538a9-3)">
 <g class="plt-s" data-s="3">
 <rect x="500.33" y="159.01" width="7.16" height="35.44" fill="#4682b4"/>
 <rect x="507.49" y="194.44" width="7.16" height="0" fill="#4682b4"/>
@@ -382,8 +396,8 @@ feature_count times { |i|
 <line x1="488.32" y1="42.58" x2="493.18" y2="42.58" fill="none" stroke="#000000" stroke-width="1.11"/>
 <text x="483.45" y="47.58" font-size="13.89" text-anchor="end">150</text>
 <text x="571.91" y="27.9" font-size="12.5" text-anchor="middle">BP</text>
-<clipPath id="clip7e6e839b-4"><rect x="714.01" y="39.24" width="157.46" height="155.21"/></clipPath>
-<g clip-path="url(#clip7e6e839b-4)">
+<clipPath id="clip0c0538a9-4"><rect x="714.01" y="39.24" width="157.46" height="155.21"/></clipPath>
+<g clip-path="url(#clip0c0538a9-4)">
 <g class="plt-s" data-s="4">
 <rect x="721.17" y="46.63" width="7.16" height="147.82" fill="#4682b4"/>
 <rect x="728.32" y="191.84" width="7.16" height="2.6" fill="#4682b4"/>
@@ -428,8 +442,8 @@ feature_count times { |i|
 <line x1="709.15" y1="64.21" x2="714.01" y2="64.21" fill="none" stroke="#000000" stroke-width="1.11"/>
 <text x="704.29" y="69.21" font-size="13.89" text-anchor="end">200</text>
 <text x="792.74" y="27.9" font-size="12.5" text-anchor="middle">Skin</text>
-<clipPath id="clip7e6e839b-5"><rect x="51.51" y="255.9" width="157.46" height="155.21"/></clipPath>
-<g clip-path="url(#clip7e6e839b-5)">
+<clipPath id="clip0c0538a9-5"><rect x="51.51" y="255.9" width="157.46" height="155.21"/></clipPath>
+<g clip-path="url(#clip0c0538a9-5)">
 <g class="plt-s" data-s="5">
 <rect x="58.67" y="263.29" width="7.16" height="147.82" fill="#4682b4"/>
 <rect x="65.82" y="376.68" width="7.16" height="34.43" fill="#4682b4"/>
@@ -472,8 +486,8 @@ feature_count times { |i|
 <line x1="46.65" y1="261.42" x2="51.51" y2="261.42" fill="none" stroke="#000000" stroke-width="1.11"/>
 <text x="41.79" y="266.42" font-size="13.89" text-anchor="end">400</text>
 <text x="130.24" y="244.57" font-size="12.5" text-anchor="middle">Insulin</text>
-<clipPath id="clip7e6e839b-6"><rect x="272.34" y="255.9" width="157.46" height="155.21"/></clipPath>
-<g clip-path="url(#clip7e6e839b-6)">
+<clipPath id="clip0c0538a9-6"><rect x="272.34" y="255.9" width="157.46" height="155.21"/></clipPath>
+<g clip-path="url(#clip0c0538a9-6)">
 <g class="plt-s" data-s="6">
 <rect x="279.5" y="399.5" width="7.16" height="11.61" fill="#4682b4"/>
 <rect x="286.66" y="411.11" width="7.16" height="0" fill="#4682b4"/>
@@ -514,8 +528,8 @@ feature_count times { |i|
 <line x1="267.48" y1="305.53" x2="272.34" y2="305.53" fill="none" stroke="#000000" stroke-width="1.11"/>
 <text x="262.62" y="310.53" font-size="13.89" text-anchor="end">100</text>
 <text x="351.07" y="244.57" font-size="12.5" text-anchor="middle">BMI</text>
-<clipPath id="clip7e6e839b-7"><rect x="493.18" y="255.9" width="157.46" height="155.21"/></clipPath>
-<g clip-path="url(#clip7e6e839b-7)">
+<clipPath id="clip0c0538a9-7"><rect x="493.18" y="255.9" width="157.46" height="155.21"/></clipPath>
+<g clip-path="url(#clip0c0538a9-7)">
 <g class="plt-s" data-s="7">
 <rect x="500.33" y="325.07" width="7.16" height="86.04" fill="#4682b4"/>
 <rect x="507.49" y="263.29" width="7.16" height="147.82" fill="#4682b4"/>
@@ -560,8 +574,8 @@ feature_count times { |i|
 <line x1="488.32" y1="264.03" x2="493.18" y2="264.03" fill="none" stroke="#000000" stroke-width="1.11"/>
 <text x="483.45" y="269.03" font-size="13.89" text-anchor="end">200</text>
 <text x="571.91" y="244.57" font-size="12.5" text-anchor="middle">Pedigree</text>
-<clipPath id="clip7e6e839b-8"><rect x="714.01" y="255.9" width="157.46" height="155.21"/></clipPath>
-<g clip-path="url(#clip7e6e839b-8)">
+<clipPath id="clip0c0538a9-8"><rect x="714.01" y="255.9" width="157.46" height="155.21"/></clipPath>
+<g clip-path="url(#clip0c0538a9-8)">
 <g class="plt-s" data-s="8">
 <rect x="721.17" y="263.29" width="7.16" height="147.82" fill="#4682b4"/>
 <rect x="728.32" y="302.6" width="7.16" height="108.51" fill="#4682b4"/>
@@ -605,7 +619,7 @@ feature_count times { |i|
 <text x="704.29" y="287.95" font-size="13.89" text-anchor="end">150</text>
 <text x="792.74" y="244.57" font-size="12.5" text-anchor="middle">Age</text>
 <script type="text/javascript">//<![CDATA[
-(function(){var svg=document.getElementById("pltaa634b211a32");if(!svg)return;var D={a:[[51.51,39.24,157.46,155.21],[272.34,39.24,157.46,155.21],[493.18,39.24,157.46,155.21],[714.01,39.24,157.46,155.21],[51.51,255.9,157.46,155.21],[272.34,255.9,157.46,155.21],[493.18,255.9,157.46,155.21],[714.01,255.9,157.46,155.21]],t:[[1,0,1,58.67,72.91,7.16,121.54,["","x: 0 to 0.85","y: 111"],"#4682b4"],
+(function(){var svg=document.getElementById("plt98281d4f99f5");if(!svg)return;var D={a:[[51.51,39.24,157.46,155.21],[272.34,39.24,157.46,155.21],[493.18,39.24,157.46,155.21],[714.01,39.24,157.46,155.21],[51.51,255.9,157.46,155.21],[272.34,255.9,157.46,155.21],[493.18,255.9,157.46,155.21],[714.01,255.9,157.46,155.21]],t:[[1,0,1,58.67,72.91,7.16,121.54,["","x: 0 to 0.85","y: 111"],"#4682b4"],
 [1,0,1,65.82,46.63,7.16,147.82,["","x: 0.85 to 1.7","y: 135"],"#4682b4"],
 [1,0,1,72.98,81.67,7.16,112.78,["","x: 1.7 to 2.55","y: 103"],"#4682b4"],
 [1,0,1,80.14,112.32,7.16,82.12,["","x: 2.55 to 3.4","y: 75"],"#4682b4"],
@@ -769,7 +783,7 @@ feature_count times { |i|
 </svg>
 <figcaption><strong>Figure 3:</strong> Distribution of each feature before cleaning.</figcaption>
 </figure>
-<p>Splitting the same distributions by outcome, in <a href="#fig-byclass">Figure 4</a>, shows which features actually separate the two groups (the missing-value zeros are left out here). Glucose, and to a lesser degree BMI and Age, shift clearly to the right for diabetic patients, while BloodPressure and SkinThickness barely differ.</p>
+<p>We can also split the same distributions by class outcome as in <a href="#fig-byclass">Figure 4</a>. This figure shows which features actually separate the two groups (the missing-value zeros are left out here). Glucose, and to a lesser degree BMI and Age, shift clearly to the right for diabetic patients, while BloodPressure and SkinThickness barely differ.</p>
 <pre class="code"><code class="language-clay">[cls_fig, cls_axs] = Plot subplots(2, 4, #{figsize: [9, 4.5]})
 
 feature_count times { |i|
@@ -793,10 +807,10 @@ feature_count times { |i|
     (i == 0) ifTrue { cls_ax legend(#{fontsize: 7}) }
 }</code></pre>
 <figure id="fig-byclass">
-<svg id="plt0d6eb9da78f4" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="900" height="450" viewBox="0 0 900 450" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
+<svg id="pltabacb0f5d42f" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="900" height="450" viewBox="0 0 900 450" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
 <rect width="100%" height="100%" fill="#ffffff"/>
-<clipPath id="clip9be6c1c5-1"><rect x="51.51" y="39.24" width="157.46" height="155.21"/></clipPath>
-<g clip-path="url(#clip9be6c1c5-1)">
+<clipPath id="clip60990639-1"><rect x="51.51" y="39.24" width="157.46" height="155.21"/></clipPath>
+<g clip-path="url(#clip60990639-1)">
 <g class="plt-s" data-s="1">
 <rect x="58.67" y="92.65" width="7.3" height="101.8" fill="#4682b4" opacity="0.6"/>
 <rect x="65.96" y="46.63" width="7.3" height="147.82" fill="#4682b4" opacity="0.6"/>
@@ -862,8 +876,8 @@ feature_count times { |i|
 <rect x="114.84" y="64.03" width="19.44" height="6.81" fill="#ff6347" opacity="0.6"/>
 <text x="142.06" y="70.93" font-size="9.72">Diabetes</text>
 </g>
-<clipPath id="clip9be6c1c5-2"><rect x="272.34" y="39.24" width="157.46" height="155.21"/></clipPath>
-<g clip-path="url(#clip9be6c1c5-2)">
+<clipPath id="clip60990639-2"><rect x="272.34" y="39.24" width="157.46" height="155.21"/></clipPath>
+<g clip-path="url(#clip60990639-2)">
 <g class="plt-s" data-s="3">
 <rect x="279.5" y="192.9" width="9.42" height="1.54" fill="#4682b4" opacity="0.6"/>
 <rect x="288.92" y="186.75" width="9.42" height="7.7" fill="#4682b4" opacity="0.6"/>
@@ -918,8 +932,8 @@ feature_count times { |i|
 <line x1="267.48" y1="40.47" x2="272.34" y2="40.47" fill="none" stroke="#000000" stroke-width="1.11"/>
 <text x="262.62" y="45.47" font-size="13.89" text-anchor="end">100</text>
 <text x="351.07" y="27.9" font-size="12.5" text-anchor="middle">Gluc</text>
-<clipPath id="clip9be6c1c5-3"><rect x="493.18" y="39.24" width="157.46" height="155.21"/></clipPath>
-<g clip-path="url(#clip9be6c1c5-3)">
+<clipPath id="clip60990639-3"><rect x="493.18" y="39.24" width="157.46" height="155.21"/></clipPath>
+<g clip-path="url(#clip60990639-3)">
 <g class="plt-s" data-s="5">
 <rect x="500.33" y="192.08" width="9.54" height="2.37" fill="#4682b4" opacity="0.6"/>
 <rect x="509.88" y="194.44" width="9.54" height="0" fill="#4682b4" opacity="0.6"/>
@@ -970,8 +984,8 @@ feature_count times { |i|
 <line x1="488.32" y1="76.19" x2="493.18" y2="76.19" fill="none" stroke="#000000" stroke-width="1.11"/>
 <text x="483.45" y="81.19" font-size="13.89" text-anchor="end">100</text>
 <text x="571.91" y="27.9" font-size="12.5" text-anchor="middle">BP</text>
-<clipPath id="clip9be6c1c5-4"><rect x="714.01" y="39.24" width="157.46" height="155.21"/></clipPath>
-<g clip-path="url(#clip9be6c1c5-4)">
+<clipPath id="clip60990639-4"><rect x="714.01" y="39.24" width="157.46" height="155.21"/></clipPath>
+<g clip-path="url(#clip60990639-4)">
 <g class="plt-s" data-s="7">
 <rect x="721.17" y="171.7" width="5.5" height="22.74" fill="#4682b4" opacity="0.6"/>
 <rect x="726.66" y="120.54" width="5.5" height="73.91" fill="#4682b4" opacity="0.6"/>
@@ -1022,8 +1036,8 @@ feature_count times { |i|
 <line x1="709.15" y1="80.74" x2="714.01" y2="80.74" fill="none" stroke="#000000" stroke-width="1.11"/>
 <text x="704.29" y="85.74" font-size="13.89" text-anchor="end">40</text>
 <text x="792.74" y="27.9" font-size="12.5" text-anchor="middle">Skin</text>
-<clipPath id="clip9be6c1c5-5"><rect x="51.51" y="255.9" width="157.46" height="155.21"/></clipPath>
-<g clip-path="url(#clip9be6c1c5-5)">
+<clipPath id="clip60990639-5"><rect x="51.51" y="255.9" width="157.46" height="155.21"/></clipPath>
+<g clip-path="url(#clip60990639-5)">
 <g class="plt-s" data-s="9">
 <rect x="58.84" y="310.92" width="8.36" height="100.19" fill="#4682b4" opacity="0.6"/>
 <rect x="67.2" y="263.29" width="8.36" height="147.82" fill="#4682b4" opacity="0.6"/>
@@ -1078,8 +1092,8 @@ feature_count times { |i|
 <line x1="46.65" y1="279.72" x2="51.51" y2="279.72" fill="none" stroke="#000000" stroke-width="1.11"/>
 <text x="41.79" y="284.72" font-size="13.89" text-anchor="end">80</text>
 <text x="130.24" y="244.57" font-size="12.5" text-anchor="middle">Insulin</text>
-<clipPath id="clip9be6c1c5-6"><rect x="272.34" y="255.9" width="157.46" height="155.21"/></clipPath>
-<g clip-path="url(#clip9be6c1c5-6)">
+<clipPath id="clip60990639-6"><rect x="272.34" y="255.9" width="157.46" height="155.21"/></clipPath>
+<g clip-path="url(#clip60990639-6)">
 <g class="plt-s" data-s="11">
 <rect x="279.5" y="374.64" width="7.63" height="36.47" fill="#4682b4" opacity="0.6"/>
 <rect x="287.13" y="334.32" width="7.63" height="76.79" fill="#4682b4" opacity="0.6"/>
@@ -1136,8 +1150,8 @@ feature_count times { |i|
 <line x1="267.48" y1="257.53" x2="272.34" y2="257.53" fill="none" stroke="#000000" stroke-width="1.11"/>
 <text x="262.62" y="262.53" font-size="13.89" text-anchor="end">80</text>
 <text x="351.07" y="244.57" font-size="12.5" text-anchor="middle">BMI</text>
-<clipPath id="clip9be6c1c5-7"><rect x="493.18" y="255.9" width="157.46" height="155.21"/></clipPath>
-<g clip-path="url(#clip9be6c1c5-7)">
+<clipPath id="clip60990639-7"><rect x="493.18" y="255.9" width="157.46" height="155.21"/></clipPath>
+<g clip-path="url(#clip60990639-7)">
 <g class="plt-s" data-s="13">
 <rect x="500.33" y="288.92" width="9.17" height="122.2" fill="#4682b4" opacity="0.6"/>
 <rect x="509.51" y="263.29" width="9.17" height="147.82" fill="#4682b4" opacity="0.6"/>
@@ -1192,8 +1206,8 @@ feature_count times { |i|
 <line x1="488.32" y1="263.29" x2="493.18" y2="263.29" fill="none" stroke="#000000" stroke-width="1.11"/>
 <text x="483.45" y="268.29" font-size="13.89" text-anchor="end">150</text>
 <text x="571.91" y="244.57" font-size="12.5" text-anchor="middle">Pedigree</text>
-<clipPath id="clip9be6c1c5-8"><rect x="714.01" y="255.9" width="157.46" height="155.21"/></clipPath>
-<g clip-path="url(#clip9be6c1c5-8)">
+<clipPath id="clip60990639-8"><rect x="714.01" y="255.9" width="157.46" height="155.21"/></clipPath>
+<g clip-path="url(#clip60990639-8)">
 <g class="plt-s" data-s="15">
 <rect x="721.17" y="263.29" width="9.54" height="147.82" fill="#4682b4" opacity="0.6"/>
 <rect x="730.71" y="326.19" width="9.54" height="84.92" fill="#4682b4" opacity="0.6"/>
@@ -1249,7 +1263,7 @@ feature_count times { |i|
 <text x="704.29" y="298.17" font-size="13.89" text-anchor="end">150</text>
 <text x="792.74" y="244.57" font-size="12.5" text-anchor="middle">Age</text>
 <script type="text/javascript">//<![CDATA[
-(function(){var svg=document.getElementById("plt0d6eb9da78f4");if(!svg)return;var D={a:[[51.51,39.24,157.46,155.21],[272.34,39.24,157.46,155.21],[493.18,39.24,157.46,155.21],[714.01,39.24,157.46,155.21],[51.51,255.9,157.46,155.21],[272.34,255.9,157.46,155.21],[493.18,255.9,157.46,155.21],[714.01,255.9,157.46,155.21]],t:[[1,0,1,58.67,92.65,7.3,101.8,["No diabetes","x: 0 to 0.8667","y: 73"],"#4682b4"],
+(function(){var svg=document.getElementById("pltabacb0f5d42f");if(!svg)return;var D={a:[[51.51,39.24,157.46,155.21],[272.34,39.24,157.46,155.21],[493.18,39.24,157.46,155.21],[714.01,39.24,157.46,155.21],[51.51,255.9,157.46,155.21],[272.34,255.9,157.46,155.21],[493.18,255.9,157.46,155.21],[714.01,255.9,157.46,155.21]],t:[[1,0,1,58.67,92.65,7.3,101.8,["No diabetes","x: 0 to 0.8667","y: 73"],"#4682b4"],
 [1,0,1,65.96,46.63,7.3,147.82,["No diabetes","x: 0.8667 to 1.733","y: 106"],"#4682b4"],
 [1,0,1,73.26,77.31,7.3,117.14,["No diabetes","x: 1.733 to 2.6","y: 84"],"#4682b4"],
 [1,0,1,80.56,127.51,7.3,66.94,["No diabetes","x: 2.6 to 3.467","y: 48"],"#4682b4"],
@@ -1493,9 +1507,10 @@ feature_count times { |i|
 </svg>
 <figcaption><strong>Figure 4:</strong> Feature distributions by outcome (missing values excluded).</figcaption>
 </figure>
+<h2 id="cleaning-the-data">Cleaning the data</h2>
 <p>To analyze the dataset, given many missing values, we need to either drop those rows (losing precious data from such a small dataset), or better, find some way to replace the missing data.</p>
-<p>One way to replace, or impute, missing data is to fill empty data columns with the column mean or median. This analysis selected mean.</p>
-<p>Several helper functions were created to find the mean value of all training_data columns and to use that to replace missing data fields.</p>
+<p>One way to replace, or impute, missing data is to fill empty data columns with the column mean, median or mode. Complex analsyis could also be done to synthesize missing values as a function of existing row values. This analysis explored several options and selected the mean.</p>
+<p>Several helper functions, shown below, were created to find the mean of all <code>training_data</code> columns and to use those values to replace missing data fields.</p>
 <pre class="code"><code class="language-clay">    // mean of the non-zero values in each column. Fitted on the training data only,
     // so nothing leaks in from the validation/test sets.
     imputeMeans = { |train_data|
@@ -1545,7 +1560,7 @@ feature_count times { |i|
         [train_data standardize(mu, sigma), val_data standardize(mu, sigma), test_data standardize(mu, sigma)]
     }</code></pre>
 <h2 id="splitting-the-data">Splitting the data</h2>
-<p>Now that we have a method for cleaning the data, we can split the full dataset into training, validation and testing groups. We use an 80/10/10 split for this analysis.</p>
+<p>Now that we have a method for cleaning the data, we can split the full dataset into cleaned <strong>training</strong>, <strong>validation</strong> and <strong>testing</strong> groups. We use an 80/10/10 split for this analysis. A 70/20/10 split could also have been used. Given the limited data size, more training data was prioritized.</p>
 <pre class="code"><code class="language-clay">    // split into 80% train, 10% validation (early stopping), 10% test
     split = { |data|
         [train_data, rest] = data split(0.8)
@@ -1567,7 +1582,7 @@ feature_count times { |i|
 <pre class="output"><code>Cleaning data (impute 0s, standardize)...
 Column avgs: [4.4884615, 121.43678, 72.04281, 29.022882, 154.558, 32.364815, 0.48117915, 33.197067, 1]</code></pre>
 <h2 id="feature-correlations">Feature correlations</h2>
-<p>Before modelling, it helps to see how the features relate to each other and to the outcome. <a href="#fig-corr">Figure 5</a> shows the Pearson correlation of every pair of columns in the cleaned training data (the last row and column is the diabetes outcome). Glucose has by far the strongest link with the outcome, and several features move together (age and pregnancies, skin thickness and BMI).</p>
+<p>Before investing in modelling and training, it helps to gain an understanding of how the features relate to each other and to the outcome. <a href="#fig-corr">Figure 5</a> shows the Pearson correlation of every pair of columns in the cleaned training data (the last row and column is the diabetes outcome). From this view, we can see that measured blood glucose levels has, by far, the strongest link with the outcome, and that several features move together (age and pregnancies, skin thickness and BMI).</p>
 <pre class="code"><code class="language-clay">corr_names = features + [&quot;Outcome&quot;]
 corr_rows = train_data toArray
 corr_n = corr_names size
@@ -1607,10 +1622,10 @@ corr_n times { |a|
 
 Plot title(&quot;Feature correlations&quot;)</code></pre>
 <figure id="fig-corr">
-<svg id="pltbf9234496863" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="700" height="600" viewBox="0 0 700 600" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
+<svg id="plte3f772b1e861" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="700" height="600" viewBox="0 0 700 600" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
 <rect width="100%" height="100%" fill="#ffffff"/>
-<clipPath id="clip48d81418-1"><rect x="87.73" y="37.5" width="489.8" height="489.8"/></clipPath>
-<g clip-path="url(#clip48d81418-1)">
+<clipPath id="clipa3053857-1"><rect x="87.73" y="37.5" width="489.8" height="489.8"/></clipPath>
+<g clip-path="url(#clipa3053857-1)">
 <g class="plt-s" data-s="1">
 <image x="87.73" y="37.5" width="489.8" height="489.8" preserveAspectRatio="none" image-rendering="optimizeSpeed" style="image-rendering:pixelated" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAJCAIAAABv85FHAAAA+ElEQVR4XmPcwqJmcXYu0+8f39iEGBgYfjFyfGfikdo9mcHCgfHNxcMnjJOtj/QxMDJz3L/0U1bjL7cA67tnDHeuMQF1ACWO2hT9Z2L+qGXP+Ov7K1Y5xt+//hjbM4GMYmS2Oj7lmGUO289Pf8+fFvz78oeEMtPP70xAO4BG/WLng0gz2Hux/P/N/Ocnw/9/TEDLgXZwvn3AcHin1cnpx8wzGRn+v2eXZPn4mvHq1YcSvx8A7QAaBdQBlDhunKJ9fq3A92dMQOcCXSXz5BDz/z9Mf359YBYBSlw1DGb884vx/YktzJdOglz18zvQDqBRv0VkgRJH7IoBvSx4/BBPLZAAAAAASUVORK5CYII="/>
 </g>
@@ -1759,24 +1774,26 @@ Plot title(&quot;Feature correlations&quot;)</code></pre>
 <text x="620.59" y="42.5" font-size="13.89">1.00</text>
 <text transform="translate(668.71 282.4) rotate(-90)" y="10.56" font-size="13.89" text-anchor="middle">Pearson r</text>
 <script type="text/javascript">//<![CDATA[
-(function(){var svg=document.getElementById("pltbf9234496863");if(!svg)return;var D={a:[[87.73,37.5,489.8,489.8]],t:[[2,0,1,87.73,37.5,489.8,489.8,9,9,0,[1,0.13542,0.175084,0.076939,0.074079,0.027181,−0.047127,0.535479,0.211149,0.13542,1,0.211085,0.197781,0.428237,0.22687,0.149387,0.277712,0.490223,0.175084,0.211085,0.999999,0.184821,0.103607,0.273661,−0.033857,0.306944,0.171457,0.076939,0.197781,0.184821,1,0.182261,0.547047,0.105721,0.128849,0.219059,0.074079,0.428237,0.103607,0.182261,1,0.170355,0.138101,0.168271,0.226171,0.027181,0.22687,0.273661,0.547047,0.170355,1,0.144367,0.016698,0.331373,−0.047127,0.149387,−0.033857,0.105721,0.138101,0.144367,1,0.03487,0.18909,0.535479,0.277712,0.306944,0.128849,0.168271,0.016698,0.03487,1,0.218166,0.211149,0.490223,0.171457,0.219059,0.226171,0.331373,0.18909,0.218166,1],"Pearson r",["Preg","Gluc","BP","Skin","Insulin","BMI","Pedigree","Age","Outcome"],["Preg","Gluc","BP","Skin","Insulin","BMI","Pedigree","Age","Outcome"]]]},FS=13.89,R=13.89;var NS='http://www.w3.org/2000/svg',hidden={};function mk(n,a){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);return e;}var hl=mk('g',{'pointer-events':'none'}),tip=mk('g',{'pointer-events':'none'});var box=mk('rect',{rx:3,ry:3,fill:'#ffffff','fill-opacity':0.95,stroke:'#999999','stroke-width':1});var txt=mk('text',{'font-size':FS,fill:'#222222'});tip.appendChild(box);tip.appendChild(txt);tip.style.display='none';svg.appendChild(hl);svg.appendChild(tip);function fmt(v){if(v===null||v===undefined)return '-';var a=Math.abs(v);if(a!==0&&(a>=1e6||a<1e-4))return v.toExponential(3);return String(Number(v.toPrecision(4)));}function at(e){var p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(svg.getScreenCTM().inverse());}function inAx(x,y){for(var i=D.a.length-1;i>=0;i--){var b=D.a[i];if(x>=b[0]&&x<=b[0]+b[2]&&y>=b[1]&&y<=b[1]+b[3])return i;}return -1;}function find(x,y){var ax=inAx(x,y);if(ax<0)return null;var best=null,bd=R*R,hit=null,i,t;for(i=0;i<D.t.length;i++){t=D.t[i];if(t[1]!==ax||hidden[t[2]])continue;if(t[0]===0){var dx=t[3]-x,dy=t[4]-y,d=dx*dx+dy*dy;if(d<=bd){bd=d;best={x:t[3],y:t[4],lines:t[5],c:t[6],k:'p'};}}else if(t[0]===1){if(x>=t[3]&&x<=t[3]+t[5]&&y>=t[4]&&y<=t[4]+t[6])hit={x:t[3],y:t[4],w:t[5],h:t[6],lines:t[7],c:t[8],k:'r'};}else if(t[0]===3){var ex=x-t[3],ey=t[4]-y,r=Math.sqrt(ex*ex+ey*ey);if(r>=t[5]&&r<=t[6]){var a=Math.atan2(ey,ex)*180/Math.PI,lo=Math.min(t[7],t[8]),hi=Math.max(t[7],t[8]);while(a<lo)a+=360;while(a>lo+360)a-=360;if(a<=hi)hit={x:x,y:y,lines:t[9],c:t[10],k:'w'};}}else if(t[0]===2&&!hit){if(x>=t[3]&&x<t[3]+t[5]&&y>=t[4]&&y<t[4]+t[6]){var cw=t[5]/t[8],ch=t[6]/t[7],c=Math.floor((x-t[3])/cw),rr=Math.floor((y-t[4])/ch),row=t[9]?t[7]-1-rr:rr;var v=t[10][row*t[8]+c],ls=[t[11]];ls.push((t[12]?t[12][row]:'row '+row)+', '+(t[13]?t[13][c]:'column '+c));ls.push('value: '+fmt(v));hit={x:t[3]+c*cw,y:t[4]+rr*ch,w:cw,h:ch,lines:ls,c:'#000000',k:'r'};}}}return best||hit;}function hide(){tip.style.display='none';while(hl.firstChild)hl.removeChild(hl.firstChild);}function show(h,x,y){while(hl.firstChild)hl.removeChild(hl.firstChild);if(h.k==='p')hl.appendChild(mk('circle',{cx:h.x,cy:h.y,r:FS*0.45,fill:'none',stroke:h.c||'#000000','stroke-width':2}));if(h.k==='r')hl.appendChild(mk('rect',{x:h.x,y:h.y,width:h.w,height:h.h,fill:'none',stroke:'#000000','stroke-width':1.5,'stroke-opacity':0.6}));while(txt.firstChild)txt.removeChild(txt.firstChild);var n=0;for(var i=0;i<h.lines.length;i++){var l=h.lines[i];if(l===''||l===null)continue;var s=mk('tspan',{x:0,dy:n===0?0:FS*1.25});if(i===0&&h.lines.length>1)s.setAttribute('font-weight','bold');s.textContent=l;txt.appendChild(s);n++;}if(n===0){hide();return;}tip.style.display='';var b=txt.getBBox(),p=FS*0.4;box.setAttribute('x',b.x-p);box.setAttribute('y',b.y-p);box.setAttribute('width',b.width+2*p);box.setAttribute('height',b.height+2*p);var W=svg.viewBox.baseVal.width,H=svg.viewBox.baseVal.height,tx=x+FS,ty=y+FS*1.5;if(tx+b.width+2*p>W)tx=x-FS-b.width-p;if(ty+b.height+p>H)ty=y-b.height-FS*0.5;if(tx<p)tx=p;if(ty<FS)ty=FS;tip.setAttribute('transform','translate('+tx+','+ty+')');}svg.addEventListener('mousemove',function(e){var p=at(e),h=find(p.x,p.y);if(h)show(h,p.x,p.y);else hide();});svg.addEventListener('mouseleave',hide);var items=svg.querySelectorAll('.plt-l');for(var j=0;j<items.length;j++){(function(it){it.addEventListener('click',function(){var s=it.getAttribute('data-s');hidden[s]=!hidden[s];var gs=svg.querySelectorAll('.plt-s[data-s=\''+s+'\']');for(var k=0;k<gs.length;k++)gs[k].style.display=hidden[s]?'none':'';it.style.opacity=hidden[s]?0.35:1;hide();});})(items[j]);}})();
+(function(){var svg=document.getElementById("plte3f772b1e861");if(!svg)return;var D={a:[[87.73,37.5,489.8,489.8]],t:[[2,0,1,87.73,37.5,489.8,489.8,9,9,0,[1,0.13542,0.175084,0.076939,0.074079,0.027181,−0.047127,0.535479,0.211149,0.13542,1,0.211085,0.197781,0.428237,0.22687,0.149387,0.277712,0.490223,0.175084,0.211085,0.999999,0.184821,0.103607,0.273661,−0.033857,0.306944,0.171457,0.076939,0.197781,0.184821,1,0.182261,0.547047,0.105721,0.128849,0.219059,0.074079,0.428237,0.103607,0.182261,1,0.170355,0.138101,0.168271,0.226171,0.027181,0.22687,0.273661,0.547047,0.170355,1,0.144367,0.016698,0.331373,−0.047127,0.149387,−0.033857,0.105721,0.138101,0.144367,1,0.03487,0.18909,0.535479,0.277712,0.306944,0.128849,0.168271,0.016698,0.03487,1,0.218166,0.211149,0.490223,0.171457,0.219059,0.226171,0.331373,0.18909,0.218166,1],"Pearson r",["Preg","Gluc","BP","Skin","Insulin","BMI","Pedigree","Age","Outcome"],["Preg","Gluc","BP","Skin","Insulin","BMI","Pedigree","Age","Outcome"]]]},FS=13.89,R=13.89;var NS='http://www.w3.org/2000/svg',hidden={};function mk(n,a){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);return e;}var hl=mk('g',{'pointer-events':'none'}),tip=mk('g',{'pointer-events':'none'});var box=mk('rect',{rx:3,ry:3,fill:'#ffffff','fill-opacity':0.95,stroke:'#999999','stroke-width':1});var txt=mk('text',{'font-size':FS,fill:'#222222'});tip.appendChild(box);tip.appendChild(txt);tip.style.display='none';svg.appendChild(hl);svg.appendChild(tip);function fmt(v){if(v===null||v===undefined)return '-';var a=Math.abs(v);if(a!==0&&(a>=1e6||a<1e-4))return v.toExponential(3);return String(Number(v.toPrecision(4)));}function at(e){var p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(svg.getScreenCTM().inverse());}function inAx(x,y){for(var i=D.a.length-1;i>=0;i--){var b=D.a[i];if(x>=b[0]&&x<=b[0]+b[2]&&y>=b[1]&&y<=b[1]+b[3])return i;}return -1;}function find(x,y){var ax=inAx(x,y);if(ax<0)return null;var best=null,bd=R*R,hit=null,i,t;for(i=0;i<D.t.length;i++){t=D.t[i];if(t[1]!==ax||hidden[t[2]])continue;if(t[0]===0){var dx=t[3]-x,dy=t[4]-y,d=dx*dx+dy*dy;if(d<=bd){bd=d;best={x:t[3],y:t[4],lines:t[5],c:t[6],k:'p'};}}else if(t[0]===1){if(x>=t[3]&&x<=t[3]+t[5]&&y>=t[4]&&y<=t[4]+t[6])hit={x:t[3],y:t[4],w:t[5],h:t[6],lines:t[7],c:t[8],k:'r'};}else if(t[0]===3){var ex=x-t[3],ey=t[4]-y,r=Math.sqrt(ex*ex+ey*ey);if(r>=t[5]&&r<=t[6]){var a=Math.atan2(ey,ex)*180/Math.PI,lo=Math.min(t[7],t[8]),hi=Math.max(t[7],t[8]);while(a<lo)a+=360;while(a>lo+360)a-=360;if(a<=hi)hit={x:x,y:y,lines:t[9],c:t[10],k:'w'};}}else if(t[0]===2&&!hit){if(x>=t[3]&&x<t[3]+t[5]&&y>=t[4]&&y<t[4]+t[6]){var cw=t[5]/t[8],ch=t[6]/t[7],c=Math.floor((x-t[3])/cw),rr=Math.floor((y-t[4])/ch),row=t[9]?t[7]-1-rr:rr;var v=t[10][row*t[8]+c],ls=[t[11]];ls.push((t[12]?t[12][row]:'row '+row)+', '+(t[13]?t[13][c]:'column '+c));ls.push('value: '+fmt(v));hit={x:t[3]+c*cw,y:t[4]+rr*ch,w:cw,h:ch,lines:ls,c:'#000000',k:'r'};}}}return best||hit;}function hide(){tip.style.display='none';while(hl.firstChild)hl.removeChild(hl.firstChild);}function show(h,x,y){while(hl.firstChild)hl.removeChild(hl.firstChild);if(h.k==='p')hl.appendChild(mk('circle',{cx:h.x,cy:h.y,r:FS*0.45,fill:'none',stroke:h.c||'#000000','stroke-width':2}));if(h.k==='r')hl.appendChild(mk('rect',{x:h.x,y:h.y,width:h.w,height:h.h,fill:'none',stroke:'#000000','stroke-width':1.5,'stroke-opacity':0.6}));while(txt.firstChild)txt.removeChild(txt.firstChild);var n=0;for(var i=0;i<h.lines.length;i++){var l=h.lines[i];if(l===''||l===null)continue;var s=mk('tspan',{x:0,dy:n===0?0:FS*1.25});if(i===0&&h.lines.length>1)s.setAttribute('font-weight','bold');s.textContent=l;txt.appendChild(s);n++;}if(n===0){hide();return;}tip.style.display='';var b=txt.getBBox(),p=FS*0.4;box.setAttribute('x',b.x-p);box.setAttribute('y',b.y-p);box.setAttribute('width',b.width+2*p);box.setAttribute('height',b.height+2*p);var W=svg.viewBox.baseVal.width,H=svg.viewBox.baseVal.height,tx=x+FS,ty=y+FS*1.5;if(tx+b.width+2*p>W)tx=x-FS-b.width-p;if(ty+b.height+p>H)ty=y-b.height-FS*0.5;if(tx<p)tx=p;if(ty<FS)ty=FS;tip.setAttribute('transform','translate('+tx+','+ty+')');}svg.addEventListener('mousemove',function(e){var p=at(e),h=find(p.x,p.y);if(h)show(h,p.x,p.y);else hide();});svg.addEventListener('mouseleave',hide);var items=svg.querySelectorAll('.plt-l');for(var j=0;j<items.length;j++){(function(it){it.addEventListener('click',function(){var s=it.getAttribute('data-s');hidden[s]=!hidden[s];var gs=svg.querySelectorAll('.plt-s[data-s=\''+s+'\']');for(var k=0;k<gs.length;k++)gs[k].style.display=hidden[s]?'none':'';it.style.opacity=hidden[s]?0.35:1;hide();});})(items[j]);}})();
 //]]></script>
 </svg>
 <figcaption><strong>Figure 5:</strong> Correlation matrix of the features and the outcome (training split).</figcaption>
 </figure>
-<h1 id="model">Model</h1>
-<p>Given the 8 input features and 1 output class, and a presumption that the problem was linear-logistic, a simple dense network model was chosen. Since this is a single class output predictor, the loss function was set to <code>cross_entropy</code>, which <code>libann</code> treats as <code>Binary Cross Entropy</code>.</p>
+<h1 id="neural-network-model">Neural Network Model</h1>
+<p>Given the 8 input features and 1 output class, and a presumption that the problem was linear-logistic, a simple dense network model was chosen. Since this is a single-class output predictor, the loss function was set to <code>cross_entropy</code>, which for a single output node <code>libann</code> treats as <code>Binary Cross Entropy</code>.</p>
 <p>For reference, the loss function for Binary Cross Entropy is:</p>
 <p class="math display"><span class="math">BCE = −<span style="font-size:50%;"> </span><span class="stack"><span><span style="font-size:85%;position:relative;top:-0.588em;">1</span></span><span class="rule" style="border-top-width:0.065em;top:-0.28em;"></span><span><span style="font-size:85%;position:relative;top:0.588em;">N</span></span></span><span style="font-size:50%;"> </span> <span class="stack"><span><span style="font-size:125%;position:relative;top:0.08em;">∑</span></span><span><span style="font-size:70%;position:relative;top:1.314em;">i=1</span></span><span><span style="font-size:70%;position:relative;top:-1.286em;">N</span></span></span> [ y<span style="font-size:70%;position:relative;top:0.257em;">i</span> log(p<span style="font-size:70%;position:relative;top:0.257em;">i</span>) + (1 − y<span style="font-size:70%;position:relative;top:0.257em;">i</span>) log(1 − p<span style="font-size:70%;position:relative;top:0.257em;">i</span>) ]</span></p>
 <h2 id="model-details">Model details</h2>
-<p>The dataset is not large, or particularly complex. Thus, a deep NN is not necessary, and only a few small hidden layers will be used. Note that it is likely that an even smaller model may converge as well or better due to the possibility of over-fitting such a small dataset.</p>
+<p>As we've seen, this dataset is not large, or particularly complex. Thus, a deep NN is not necessary, and only a few small hidden layers will be used. Given the limited dataset size, it is likely that an even smaller model might converge as well or better due to the possibility of over-fitting such a small dataset.</p>
 <blockquote><p>In general the number of parameters in a model should be smaller than the dataset size to avoid over-training and to force generalized learning.</p></blockquote>
-<p>The total parameter count is modest and the model trains very quickly. The following properties were used to configure the network model:</p>
+<p>The following properties were used to configure the network model:</p>
 <ul>
 <li>Validation data with <code>EarlyStopping</code> with a <code>patience</code> of 10 epochs</li>
 <li>The <code>Adam</code> optimizer with the default learning rate of 0.001</li>
+<li>Input layer with 8 nodes (node per feature)</li>
 <li>Two (2) dense hidden layers with 16 and 8 nodes and <strong>ReLU</strong> activation</li>
 <li>A single dense output layer with <strong>Sigmoid</strong> activation</li></ul>
+<p>Using Clay-ann the code to creat this model looks like this:</p>
 <pre class="code"><code class="language-clay">    net = Ann network(#{&quot;earlyStopping&quot;: 10, &quot;loss&quot;: &quot;cross_entropy&quot;, &quot;quiet&quot;: true})
     net input(feature_count)
     net dense(feature_count * 2, &quot;relu&quot;)
@@ -1790,8 +1807,9 @@ Plot title(&quot;Feature correlations&quot;)</code></pre>
 2   dense             8               relu        136
 3   dense             1               sigmoid     9
 total parameters: 289</code></pre>
+<p>As can be seen from the model summary above, the total parameter count of our model is modest at 289 total parameters, which is well below the 614 rows of training data. Such a small model trains very quickly on modern hardware.</p>
 <h2 id="training">Training</h2>
-<p>Having cleaned the data and defined our network model it is time to train against the data. We use validation data to determine how well the model performs against data it has not seen. This also enables early stopping when validation loss fails to improve.</p>
+<p>Having cleaned the data, and defined our network model, it is time to train against the data. Note that a validation dataset was used to determine how well the model performs against data it has not seen. Providing validation data also enables early-stopping. When the network finds that validation loss fails to improve over a number of epochs, training halts, and the network weights are restored to the best values.</p>
 <pre class="code"><code class="language-clay">    // fraction of rows classified correctly, thresholding the sigmoid output at 0.5.
     // (net accuracy() argmaxes over output columns, which is always &quot;class 0&quot; with a single output.)
     accuracy = { |x, y|
@@ -1826,14 +1844,13 @@ Training accuracy:   80.6189%
 Validation accuracy: 70.12987%
 Test accuracy:       75.32467%</code></pre>
 <h2 id="learning-curve">Learning curve</h2>
-<p>As <a href="#fig-learn">Figure 6</a> below shows, the training loss continues to show improvement. However, the validation loss levels out at around epoch 54. This is a clear indication of the start of over-training, and that the network is beginning to memorize the training data.</p>
-<p>Displaying the learning curve to evaluate training progress requires just a few lines of Clay code.</p>
+<p>As <a href="#fig-learn">Figure 6</a> below shows, the training loss continues to show improvement. However, we can also see that the validation loss begins to level out at around epochs 40 - 50. This is a clear indication of the start of over-training, and that the network is beginning to memorize the training data.</p>
 <pre class="code"><code class="language-clay">    history = net history
 
     Plot learningCurve(history)
     Plot title(&quot;Learning curve&quot;)</code></pre>
 <figure id="fig-learn">
-<svg id="pltb487b64c8117" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="640" height="480" viewBox="0 0 640 480" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
+<svg id="plt5ec456733b20" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="640" height="480" viewBox="0 0 640 480" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
 <rect width="100%" height="100%" fill="#ffffff"/>
 <line x1="89.41" y1="37.5" x2="89.41" y2="425.14" fill="none" stroke="#b0b0b0" stroke-width="1.11" opacity="0.5"/>
 <line x1="158.1" y1="37.5" x2="158.1" y2="425.14" fill="none" stroke="#b0b0b0" stroke-width="1.11" opacity="0.5"/>
@@ -1850,8 +1867,8 @@ Test accuracy:       75.32467%</code></pre>
 <line x1="71.2" y1="186.14" x2="622.83" y2="186.14" fill="none" stroke="#b0b0b0" stroke-width="1.11" opacity="0.5"/>
 <line x1="71.2" y1="130.22" x2="622.83" y2="130.22" fill="none" stroke="#b0b0b0" stroke-width="1.11" opacity="0.5"/>
 <line x1="71.2" y1="74.29" x2="622.83" y2="74.29" fill="none" stroke="#b0b0b0" stroke-width="1.11" opacity="0.5"/>
-<clipPath id="clip92ef4246-1"><rect x="71.2" y="37.5" width="551.63" height="387.64"/></clipPath>
-<g clip-path="url(#clip92ef4246-1)">
+<clipPath id="clip19bb36d0-1"><rect x="71.2" y="37.5" width="551.63" height="387.64"/></clipPath>
+<g clip-path="url(#clip19bb36d0-1)">
 <g class="plt-s" data-s="1">
 <polyline points="96.28,55.12 103.15,108.04 110.02,146.78 116.89,180.26 123.75,208.47 130.62,231.48 137.49,248.76 144.36,268.86 151.23,279.44 158.1,289.28 164.97,302.25 171.84,308.86 178.71,315.2 185.58,321.52 192.45,330.21 199.32,331.3 206.19,332.46 213.06,335.5 219.93,340.44 226.8,345.71 233.67,348.08 240.54,351.65 247.41,350.2 254.28,352.19 261.15,362.48 268.02,356.17 274.89,357.88 281.76,361.98 288.62,364.79 295.49,369.27 302.36,364.67 309.23,368.94 316.1,367.4 322.97,370.57 329.84,378.15 336.71,370.95 343.58,371.96 350.45,374.24 357.32,382.16 364.19,378.78 371.06,376.58 377.93,381.08 384.8,382.32 391.67,383.02 398.54,382.06 405.41,384.45 412.28,383.88 419.15,382.83 426.02,384.54 432.89,383.12 439.76,384.43 446.63,386.93 453.49,388.16 460.36,392.01 467.23,390.49 474.1,390.17 480.97,391.25 487.84,392.25 494.71,393.87 501.58,392.87 508.45,391.38 515.32,396.07 522.19,395.87 529.06,396.17 535.93,395.23 542.8,394.99 549.67,394.93 556.54,396.82 563.41,400.03 570.28,407.52 577.15,405.05 584.02,400.96 590.89,402.87 597.76,403.91" fill="none" stroke="#1f77b4" stroke-width="2.08" stroke-linecap="butt" stroke-linejoin="round"/>
 </g>
@@ -1916,7 +1933,7 @@ Test accuracy:       75.32467%</code></pre>
 <text x="500.65" y="103.61" font-size="13.89">best epoch (64)</text>
 </g>
 <script type="text/javascript">//<![CDATA[
-(function(){var svg=document.getElementById("pltb487b64c8117");if(!svg)return;var D={a:[[71.2,37.5,551.63,387.64]],t:[[0,0,1,96.28,55.12,["train","epoch: 1","loss: 0.7171"],"#1f77b4"],
+(function(){var svg=document.getElementById("plt5ec456733b20");if(!svg)return;var D={a:[[71.2,37.5,551.63,387.64]],t:[[0,0,1,96.28,55.12,["train","epoch: 1","loss: 0.7171"],"#1f77b4"],
 [0,0,1,103.15,108.04,["train","epoch: 2","loss: 0.6698"],"#1f77b4"],
 [0,0,1,110.02,146.78,["train","epoch: 3","loss: 0.6352"],"#1f77b4"],
 [0,0,1,116.89,180.26,["train","epoch: 4","loss: 0.6053"],"#1f77b4"],
@@ -2092,10 +2109,10 @@ test_probs size times { |k|
 Plot figure(#{figsize: [4.5, 4]})
 Plot confusionMatrix([[tn, fp], [fn, tp]], #{labels: [&quot;No diabetes&quot;, &quot;Diabetes&quot;], title: &quot;Test set&quot;})</code></pre>
 <figure id="fig-confusion">
-<svg id="pltb04a79aaade3" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="450" height="400" viewBox="0 0 450 400" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
+<svg id="plt38bda62fd44a" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="450" height="400" viewBox="0 0 450 400" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
 <rect width="100%" height="100%" fill="#ffffff"/>
-<clipPath id="clipde0267d5-1"><rect x="123.35" y="62.53" width="257.58" height="257.58"/></clipPath>
-<g clip-path="url(#clipde0267d5-1)">
+<clipPath id="clipae11c1a8-1"><rect x="123.35" y="62.53" width="257.58" height="257.58"/></clipPath>
+<g clip-path="url(#clipae11c1a8-1)">
 <g class="plt-s" data-s="1">
 <image x="123.35" y="62.53" width="257.58" height="257.58" preserveAspectRatio="none" image-rendering="optimizeSpeed" style="image-rendering:pixelated" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAF0lEQVR4XmPgMMg+++Aj485rr1ZdegkAL3cIIQC7cmIAAAAASUVORK5CYII="/>
 </g>
@@ -2138,7 +2155,7 @@ Plot confusionMatrix([[tn, fp], [fn, tp]], #{labels: [&quot;No diabetes&quot;, &
 <line x1="414.27" y1="82.86" x2="419.13" y2="82.86" fill="none" stroke="#000000" stroke-width="1.11"/>
 <text x="423.99" y="87.86" font-size="13.89">35</text>
 <script type="text/javascript">//<![CDATA[
-(function(){var svg=document.getElementById("pltb04a79aaade3");if(!svg)return;var D={a:[[123.35,62.53,257.58,257.58]],t:[[2,0,1,123.35,62.53,257.58,257.58,2,2,0,[38,8,11,20],"",["No diabetes","Diabetes"],["No diabetes","Diabetes"]]]},FS=13.89,R=13.89;var NS='http://www.w3.org/2000/svg',hidden={};function mk(n,a){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);return e;}var hl=mk('g',{'pointer-events':'none'}),tip=mk('g',{'pointer-events':'none'});var box=mk('rect',{rx:3,ry:3,fill:'#ffffff','fill-opacity':0.95,stroke:'#999999','stroke-width':1});var txt=mk('text',{'font-size':FS,fill:'#222222'});tip.appendChild(box);tip.appendChild(txt);tip.style.display='none';svg.appendChild(hl);svg.appendChild(tip);function fmt(v){if(v===null||v===undefined)return '-';var a=Math.abs(v);if(a!==0&&(a>=1e6||a<1e-4))return v.toExponential(3);return String(Number(v.toPrecision(4)));}function at(e){var p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(svg.getScreenCTM().inverse());}function inAx(x,y){for(var i=D.a.length-1;i>=0;i--){var b=D.a[i];if(x>=b[0]&&x<=b[0]+b[2]&&y>=b[1]&&y<=b[1]+b[3])return i;}return -1;}function find(x,y){var ax=inAx(x,y);if(ax<0)return null;var best=null,bd=R*R,hit=null,i,t;for(i=0;i<D.t.length;i++){t=D.t[i];if(t[1]!==ax||hidden[t[2]])continue;if(t[0]===0){var dx=t[3]-x,dy=t[4]-y,d=dx*dx+dy*dy;if(d<=bd){bd=d;best={x:t[3],y:t[4],lines:t[5],c:t[6],k:'p'};}}else if(t[0]===1){if(x>=t[3]&&x<=t[3]+t[5]&&y>=t[4]&&y<=t[4]+t[6])hit={x:t[3],y:t[4],w:t[5],h:t[6],lines:t[7],c:t[8],k:'r'};}else if(t[0]===3){var ex=x-t[3],ey=t[4]-y,r=Math.sqrt(ex*ex+ey*ey);if(r>=t[5]&&r<=t[6]){var a=Math.atan2(ey,ex)*180/Math.PI,lo=Math.min(t[7],t[8]),hi=Math.max(t[7],t[8]);while(a<lo)a+=360;while(a>lo+360)a-=360;if(a<=hi)hit={x:x,y:y,lines:t[9],c:t[10],k:'w'};}}else if(t[0]===2&&!hit){if(x>=t[3]&&x<t[3]+t[5]&&y>=t[4]&&y<t[4]+t[6]){var cw=t[5]/t[8],ch=t[6]/t[7],c=Math.floor((x-t[3])/cw),rr=Math.floor((y-t[4])/ch),row=t[9]?t[7]-1-rr:rr;var v=t[10][row*t[8]+c],ls=[t[11]];ls.push((t[12]?t[12][row]:'row '+row)+', '+(t[13]?t[13][c]:'column '+c));ls.push('value: '+fmt(v));hit={x:t[3]+c*cw,y:t[4]+rr*ch,w:cw,h:ch,lines:ls,c:'#000000',k:'r'};}}}return best||hit;}function hide(){tip.style.display='none';while(hl.firstChild)hl.removeChild(hl.firstChild);}function show(h,x,y){while(hl.firstChild)hl.removeChild(hl.firstChild);if(h.k==='p')hl.appendChild(mk('circle',{cx:h.x,cy:h.y,r:FS*0.45,fill:'none',stroke:h.c||'#000000','stroke-width':2}));if(h.k==='r')hl.appendChild(mk('rect',{x:h.x,y:h.y,width:h.w,height:h.h,fill:'none',stroke:'#000000','stroke-width':1.5,'stroke-opacity':0.6}));while(txt.firstChild)txt.removeChild(txt.firstChild);var n=0;for(var i=0;i<h.lines.length;i++){var l=h.lines[i];if(l===''||l===null)continue;var s=mk('tspan',{x:0,dy:n===0?0:FS*1.25});if(i===0&&h.lines.length>1)s.setAttribute('font-weight','bold');s.textContent=l;txt.appendChild(s);n++;}if(n===0){hide();return;}tip.style.display='';var b=txt.getBBox(),p=FS*0.4;box.setAttribute('x',b.x-p);box.setAttribute('y',b.y-p);box.setAttribute('width',b.width+2*p);box.setAttribute('height',b.height+2*p);var W=svg.viewBox.baseVal.width,H=svg.viewBox.baseVal.height,tx=x+FS,ty=y+FS*1.5;if(tx+b.width+2*p>W)tx=x-FS-b.width-p;if(ty+b.height+p>H)ty=y-b.height-FS*0.5;if(tx<p)tx=p;if(ty<FS)ty=FS;tip.setAttribute('transform','translate('+tx+','+ty+')');}svg.addEventListener('mousemove',function(e){var p=at(e),h=find(p.x,p.y);if(h)show(h,p.x,p.y);else hide();});svg.addEventListener('mouseleave',hide);var items=svg.querySelectorAll('.plt-l');for(var j=0;j<items.length;j++){(function(it){it.addEventListener('click',function(){var s=it.getAttribute('data-s');hidden[s]=!hidden[s];var gs=svg.querySelectorAll('.plt-s[data-s=\''+s+'\']');for(var k=0;k<gs.length;k++)gs[k].style.display=hidden[s]?'none':'';it.style.opacity=hidden[s]?0.35:1;hide();});})(items[j]);}})();
+(function(){var svg=document.getElementById("plt38bda62fd44a");if(!svg)return;var D={a:[[123.35,62.53,257.58,257.58]],t:[[2,0,1,123.35,62.53,257.58,257.58,2,2,0,[38,8,11,20],"",["No diabetes","Diabetes"],["No diabetes","Diabetes"]]]},FS=13.89,R=13.89;var NS='http://www.w3.org/2000/svg',hidden={};function mk(n,a){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);return e;}var hl=mk('g',{'pointer-events':'none'}),tip=mk('g',{'pointer-events':'none'});var box=mk('rect',{rx:3,ry:3,fill:'#ffffff','fill-opacity':0.95,stroke:'#999999','stroke-width':1});var txt=mk('text',{'font-size':FS,fill:'#222222'});tip.appendChild(box);tip.appendChild(txt);tip.style.display='none';svg.appendChild(hl);svg.appendChild(tip);function fmt(v){if(v===null||v===undefined)return '-';var a=Math.abs(v);if(a!==0&&(a>=1e6||a<1e-4))return v.toExponential(3);return String(Number(v.toPrecision(4)));}function at(e){var p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(svg.getScreenCTM().inverse());}function inAx(x,y){for(var i=D.a.length-1;i>=0;i--){var b=D.a[i];if(x>=b[0]&&x<=b[0]+b[2]&&y>=b[1]&&y<=b[1]+b[3])return i;}return -1;}function find(x,y){var ax=inAx(x,y);if(ax<0)return null;var best=null,bd=R*R,hit=null,i,t;for(i=0;i<D.t.length;i++){t=D.t[i];if(t[1]!==ax||hidden[t[2]])continue;if(t[0]===0){var dx=t[3]-x,dy=t[4]-y,d=dx*dx+dy*dy;if(d<=bd){bd=d;best={x:t[3],y:t[4],lines:t[5],c:t[6],k:'p'};}}else if(t[0]===1){if(x>=t[3]&&x<=t[3]+t[5]&&y>=t[4]&&y<=t[4]+t[6])hit={x:t[3],y:t[4],w:t[5],h:t[6],lines:t[7],c:t[8],k:'r'};}else if(t[0]===3){var ex=x-t[3],ey=t[4]-y,r=Math.sqrt(ex*ex+ey*ey);if(r>=t[5]&&r<=t[6]){var a=Math.atan2(ey,ex)*180/Math.PI,lo=Math.min(t[7],t[8]),hi=Math.max(t[7],t[8]);while(a<lo)a+=360;while(a>lo+360)a-=360;if(a<=hi)hit={x:x,y:y,lines:t[9],c:t[10],k:'w'};}}else if(t[0]===2&&!hit){if(x>=t[3]&&x<t[3]+t[5]&&y>=t[4]&&y<t[4]+t[6]){var cw=t[5]/t[8],ch=t[6]/t[7],c=Math.floor((x-t[3])/cw),rr=Math.floor((y-t[4])/ch),row=t[9]?t[7]-1-rr:rr;var v=t[10][row*t[8]+c],ls=[t[11]];ls.push((t[12]?t[12][row]:'row '+row)+', '+(t[13]?t[13][c]:'column '+c));ls.push('value: '+fmt(v));hit={x:t[3]+c*cw,y:t[4]+rr*ch,w:cw,h:ch,lines:ls,c:'#000000',k:'r'};}}}return best||hit;}function hide(){tip.style.display='none';while(hl.firstChild)hl.removeChild(hl.firstChild);}function show(h,x,y){while(hl.firstChild)hl.removeChild(hl.firstChild);if(h.k==='p')hl.appendChild(mk('circle',{cx:h.x,cy:h.y,r:FS*0.45,fill:'none',stroke:h.c||'#000000','stroke-width':2}));if(h.k==='r')hl.appendChild(mk('rect',{x:h.x,y:h.y,width:h.w,height:h.h,fill:'none',stroke:'#000000','stroke-width':1.5,'stroke-opacity':0.6}));while(txt.firstChild)txt.removeChild(txt.firstChild);var n=0;for(var i=0;i<h.lines.length;i++){var l=h.lines[i];if(l===''||l===null)continue;var s=mk('tspan',{x:0,dy:n===0?0:FS*1.25});if(i===0&&h.lines.length>1)s.setAttribute('font-weight','bold');s.textContent=l;txt.appendChild(s);n++;}if(n===0){hide();return;}tip.style.display='';var b=txt.getBBox(),p=FS*0.4;box.setAttribute('x',b.x-p);box.setAttribute('y',b.y-p);box.setAttribute('width',b.width+2*p);box.setAttribute('height',b.height+2*p);var W=svg.viewBox.baseVal.width,H=svg.viewBox.baseVal.height,tx=x+FS,ty=y+FS*1.5;if(tx+b.width+2*p>W)tx=x-FS-b.width-p;if(ty+b.height+p>H)ty=y-b.height-FS*0.5;if(tx<p)tx=p;if(ty<FS)ty=FS;tip.setAttribute('transform','translate('+tx+','+ty+')');}svg.addEventListener('mousemove',function(e){var p=at(e),h=find(p.x,p.y);if(h)show(h,p.x,p.y);else hide();});svg.addEventListener('mouseleave',hide);var items=svg.querySelectorAll('.plt-l');for(var j=0;j<items.length;j++){(function(it){it.addEventListener('click',function(){var s=it.getAttribute('data-s');hidden[s]=!hidden[s];var gs=svg.querySelectorAll('.plt-s[data-s=\''+s+'\']');for(var k=0;k<gs.length;k++)gs[k].style.display=hidden[s]?'none':'';it.style.opacity=hidden[s]?0.35:1;hide();});})(items[j]);}})();
 //]]></script>
 </svg>
 <figcaption><strong>Figure 7:</strong> Confusion matrix on the test split (rows: actual, columns: predicted).</figcaption>
@@ -2151,7 +2168,7 @@ test_labels = test_truth map { |r| r at(0) }
 Plot figure(#{figsize: [5, 4.5]})
 roc_result = Plot roc(test_scores, test_labels, #{chance: true, title: &quot;ROC curve&quot;})</code></pre>
 <figure id="fig-roc">
-<svg id="plt37be32b20550" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="500" height="450" viewBox="0 0 500 450" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
+<svg id="pltc17fe8490c7b" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="500" height="450" viewBox="0 0 500 450" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
 <rect width="100%" height="100%" fill="#ffffff"/>
 <line x1="62.37" y1="37.5" x2="62.37" y2="395.14" fill="none" stroke="#b0b0b0" stroke-width="1.11" opacity="0.5"/>
 <line x1="146.02" y1="37.5" x2="146.02" y2="395.14" fill="none" stroke="#b0b0b0" stroke-width="1.11" opacity="0.5"/>
@@ -2165,8 +2182,8 @@ roc_result = Plot roc(test_scores, test_labels, #{chance: true, title: &quot;ROC
 <line x1="62.37" y1="184.76" x2="480.62" y2="184.76" fill="none" stroke="#b0b0b0" stroke-width="1.11" opacity="0.5"/>
 <line x1="62.37" y1="114.64" x2="480.62" y2="114.64" fill="none" stroke="#b0b0b0" stroke-width="1.11" opacity="0.5"/>
 <line x1="62.37" y1="44.51" x2="480.62" y2="44.51" fill="none" stroke="#b0b0b0" stroke-width="1.11" opacity="0.5"/>
-<clipPath id="clip778ed175-1"><rect x="62.37" y="37.5" width="418.26" height="357.64"/></clipPath>
-<g clip-path="url(#clip778ed175-1)">
+<clipPath id="clip95805d3b-1"><rect x="62.37" y="37.5" width="418.26" height="357.64"/></clipPath>
+<g clip-path="url(#clip95805d3b-1)">
 <g class="plt-s" data-s="1">
 <polyline points="62.37,395.14 62.37,383.83 71.46,383.83 71.46,372.52 71.46,361.21 71.46,349.9 71.46,338.59 71.46,327.28 71.46,315.97 71.46,304.65 71.46,293.34 71.46,282.03 71.46,270.72 71.46,259.41 80.55,259.41 80.55,248.1 80.55,236.79 80.55,225.48 80.55,214.17 80.55,202.86 89.64,202.86 89.64,191.55 89.64,180.24 89.64,168.93 98.74,168.93 107.83,168.93 116.92,168.93 126.01,168.93 135.11,168.93 135.11,157.62 144.2,157.62 144.2,146.31 144.2,135 144.2,123.69 153.29,123.69 162.38,123.69 162.38,112.38 171.48,112.38 180.57,112.38 180.57,101.07 189.66,101.07 198.75,101.07 207.85,101.07 216.94,101.07 226.03,101.07 235.12,101.07 244.22,101.07 244.22,89.75 244.22,78.44 253.31,78.44 262.4,78.44 271.49,78.44 271.49,67.13 280.59,67.13 289.68,67.13 289.68,55.82 298.77,55.82 307.86,55.82 316.96,55.82 316.96,44.51 326.05,44.51 335.14,44.51 344.23,44.51 353.33,44.51 362.42,44.51 371.51,44.51 380.6,44.51 389.7,44.51 398.79,44.51 407.88,44.51 416.97,44.51 426.07,44.51 435.16,44.51 444.25,44.51 453.35,44.51 462.44,44.51 471.53,44.51 480.62,44.51" fill="none" stroke="#1f77b4" stroke-width="2.08" stroke-linecap="butt" stroke-linejoin="round"/>
 </g>
@@ -2217,7 +2234,7 @@ roc_result = Plot roc(test_scores, test_labels, #{chance: true, title: &quot;ROC
 <text x="394.58" y="380.69" font-size="13.89">chance</text>
 </g>
 <script type="text/javascript">//<![CDATA[
-(function(){var svg=document.getElementById("plt37be32b20550");if(!svg)return;var D={a:[[62.37,37.5,418.26,357.64]],t:[[0,0,1,62.37,395.14,["AUC 0.856","false positive rate: 0","true positive rate: 0"],"#1f77b4"],
+(function(){var svg=document.getElementById("pltc17fe8490c7b");if(!svg)return;var D={a:[[62.37,37.5,418.26,357.64]],t:[[0,0,1,62.37,395.14,["AUC 0.856","false positive rate: 0","true positive rate: 0"],"#1f77b4"],
 [0,0,1,62.37,383.83,["AUC 0.856","false positive rate: 0","true positive rate: 0.03226"],"#1f77b4"],
 [0,0,1,71.46,383.83,["AUC 0.856","false positive rate: 0.02174","true positive rate: 0.03226"],"#1f77b4"],
 [0,0,1,71.46,372.52,["AUC 0.856","false positive rate: 0.02174","true positive rate: 0.06452"],"#1f77b4"],
@@ -2317,10 +2334,10 @@ Plot ylabel(&quot;Patients&quot;)
 Plot legend
 Plot title(&quot;Predicted probabilities&quot;)</code></pre>
 <figure id="fig-probs">
-<svg id="plte37ebd5b9435" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="600" height="350" viewBox="0 0 600 350" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
+<svg id="plt51da3c35ebcd" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="600" height="350" viewBox="0 0 600 350" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
 <rect width="100%" height="100%" fill="#ffffff"/>
-<clipPath id="clipcbbb14db-1"><rect x="57.95" y="37.5" width="522.67" height="257.64"/></clipPath>
-<g clip-path="url(#clipcbbb14db-1)">
+<clipPath id="clip83ce8ec9-1"><rect x="57.95" y="37.5" width="522.67" height="257.64"/></clipPath>
+<g clip-path="url(#clip83ce8ec9-1)">
 <g class="plt-s" data-s="1">
 <rect x="81.71" y="49.77" width="47.52" height="245.37" fill="#4682b4" opacity="0.6"/>
 <rect x="129.22" y="147.92" width="47.52" height="147.22" fill="#4682b4" opacity="0.6"/>
@@ -2396,7 +2413,7 @@ Plot title(&quot;Predicted probabilities&quot;)</code></pre>
 <text x="485.05" y="82.78" font-size="13.89">Diabetes</text>
 </g>
 <script type="text/javascript">//<![CDATA[
-(function(){var svg=document.getElementById("plte37ebd5b9435");if(!svg)return;var D={a:[[57.95,37.5,522.67,257.64]],t:[[1,0,1,81.71,49.77,47.52,245.37,["No diabetes","Predicted probability: 0 to 0.1","Patients: 15"],"#4682b4"],
+(function(){var svg=document.getElementById("plt51da3c35ebcd");if(!svg)return;var D={a:[[57.95,37.5,522.67,257.64]],t:[[1,0,1,81.71,49.77,47.52,245.37,["No diabetes","Predicted probability: 0 to 0.1","Patients: 15"],"#4682b4"],
 [1,0,1,129.22,147.92,47.52,147.22,["No diabetes","Predicted probability: 0.1 to 0.2","Patients: 9"],"#4682b4"],
 [1,0,1,176.74,196.99,47.52,98.15,["No diabetes","Predicted probability: 0.2 to 0.3","Patients: 6"],"#4682b4"],
 [1,0,1,224.26,213.35,47.52,81.79,["No diabetes","Predicted probability: 0.3 to 0.4","Patients: 5"],"#4682b4"],
@@ -2451,10 +2468,10 @@ Plot barh(features, imp_drops, #{color: &quot;steelblue&quot;})
 Plot xlabel(&quot;Drop in accuracy&quot;)
 Plot title(&quot;Permutation importance&quot;)</code></pre>
 <figure id="fig-importance">
-<svg id="pltf4165b09365a" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="600" height="400" viewBox="0 0 600 400" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
+<svg id="plt199bd7fc2660" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="600" height="400" viewBox="0 0 600 400" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
 <rect width="100%" height="100%" fill="#ffffff"/>
-<clipPath id="clip25bf29b7-1"><rect x="78.47" y="37.5" width="493.32" height="307.64"/></clipPath>
-<g clip-path="url(#clip25bf29b7-1)">
+<clipPath id="clip01a7764a-1"><rect x="78.47" y="37.5" width="493.32" height="307.64"/></clipPath>
+<g clip-path="url(#clip01a7764a-1)">
 <g class="plt-s" data-s="1">
 <rect x="169.89" y="51.48" width="17.25" height="28.68" fill="#4682b4"/>
 <rect x="187.14" y="87.34" width="362.23" height="28.68" fill="#4682b4"/>
@@ -2503,7 +2520,7 @@ Plot title(&quot;Permutation importance&quot;)</code></pre>
 <text x="325.13" y="384.86" font-size="13.89" text-anchor="middle">Drop in accuracy</text>
 <text x="325.13" y="25.17" font-size="16.67" text-anchor="middle">Permutation importance</text>
 <script type="text/javascript">//<![CDATA[
-(function(){var svg=document.getElementById("pltf4165b09365a");if(!svg)return;var D={a:[[78.47,37.5,493.32,307.64]],t:[[1,0,1,169.89,51.48,17.25,28.68,["","y: Preg","Drop in accuracy: −0.006494"],"#4682b4"],
+(function(){var svg=document.getElementById("plt199bd7fc2660");if(!svg)return;var D={a:[[78.47,37.5,493.32,307.64]],t:[[1,0,1,169.89,51.48,17.25,28.68,["","y: Preg","Drop in accuracy: −0.006494"],"#4682b4"],
 [1,0,1,187.14,87.34,362.23,28.68,["","y: Gluc","Drop in accuracy: 0.1364"],"#4682b4"],
 [1,0,1,118.14,123.19,69,28.68,["","y: BP","Drop in accuracy: −0.02597"],"#4682b4"],
 [1,0,1,126.76,159.05,60.37,28.68,["","y: Skin","Drop in accuracy: −0.02273"],"#4682b4"],
@@ -2527,10 +2544,10 @@ embed_axs at(0) title(&quot;Input features&quot;)
 embed_axs at(1) embedding(embed_hidden, embed_classes, #{classNames: [&quot;No diabetes&quot;, &quot;Diabetes&quot;], s: 14, alpha: 0.7})
 embed_axs at(1) title(&quot;Last hidden layer&quot;)</code></pre>
 <figure id="fig-embed">
-<svg id="pltf802a84d2add" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="900" height="400" viewBox="0 0 900 400" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
+<svg id="pltccded79c66d2" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="900" height="400" viewBox="0 0 900 400" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
 <rect width="100%" height="100%" fill="#ffffff"/>
-<clipPath id="clip25d6989a-1"><rect x="67.7" y="37.5" width="370.94" height="307.64"/></clipPath>
-<g clip-path="url(#clip25d6989a-1)">
+<clipPath id="clip4de8c367-1"><rect x="67.7" y="37.5" width="370.94" height="307.64"/></clipPath>
+<g clip-path="url(#clip4de8c367-1)">
 <g class="plt-s" data-s="1">
 <circle cx="183.47" cy="192.04" r="2.6" fill="#1f77b4" stroke="#1f77b4" stroke-width="1.39" opacity="0.7"/>
 <circle cx="102.68" cy="255.16" r="2.6" fill="#1f77b4" stroke="#1f77b4" stroke-width="1.39" opacity="0.7"/>
@@ -2661,8 +2678,8 @@ embed_axs at(1) title(&quot;Last hidden layer&quot;)</code></pre>
 <circle cx="318.06" cy="77.78" r="2.6" fill="#ff7f0e" stroke="#ff7f0e" stroke-width="1.39" opacity="0.7"/>
 <text x="343.06" y="82.78" font-size="13.89">Diabetes</text>
 </g>
-<clipPath id="clip25d6989a-2"><rect x="509.36" y="37.5" width="370.94" height="307.64"/></clipPath>
-<g clip-path="url(#clip25d6989a-2)">
+<clipPath id="clip4de8c367-2"><rect x="509.36" y="37.5" width="370.94" height="307.64"/></clipPath>
+<g clip-path="url(#clip4de8c367-2)">
 <g class="plt-s" data-s="3">
 <circle cx="638.54" cy="281.5" r="2.6" fill="#1f77b4" stroke="#1f77b4" stroke-width="1.39" opacity="0.7"/>
 <circle cx="831.16" cy="190.18" r="2.6" fill="#1f77b4" stroke="#1f77b4" stroke-width="1.39" opacity="0.7"/>
@@ -2788,7 +2805,7 @@ embed_axs at(1) title(&quot;Last hidden layer&quot;)</code></pre>
 <text x="784.73" y="82.78" font-size="13.89">Diabetes</text>
 </g>
 <script type="text/javascript">//<![CDATA[
-(function(){var svg=document.getElementById("pltf802a84d2add");if(!svg)return;var D={a:[[67.7,37.5,370.94,307.64],[509.36,37.5,370.94,307.64]],t:[[0,0,1,183.47,192.04,["No diabetes","PC1 (29%): −0.5581","PC2 (18%): 0.7338"],"#1f77b4"],
+(function(){var svg=document.getElementById("pltccded79c66d2");if(!svg)return;var D={a:[[67.7,37.5,370.94,307.64],[509.36,37.5,370.94,307.64]],t:[[0,0,1,183.47,192.04,["No diabetes","PC1 (29%): −0.5581","PC2 (18%): 0.7338"],"#1f77b4"],
 [0,0,1,102.68,255.16,["No diabetes","PC1 (29%): −2.136","PC2 (18%): −0.8909"],"#1f77b4"],
 [0,0,1,118.55,225.15,["No diabetes","PC1 (29%): −1.826","PC2 (18%): −0.1185"],"#1f77b4"],
 [0,0,1,210.8,217.38,["No diabetes","PC1 (29%): −0.02405","PC2 (18%): 0.08144"],"#1f77b4"],
@@ -3013,10 +3030,10 @@ q_names = [&quot;Accuracy&quot;, &quot;AUC&quot;]
     }
 }</code></pre>
 <figure id="fig-quant">
-<svg id="plt3b27c7f23ce5" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="900" height="380" viewBox="0 0 900 380" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
+<svg id="plt7089db5602b7" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="900" height="380" viewBox="0 0 900 380" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
 <rect width="100%" height="100%" fill="#ffffff"/>
-<clipPath id="clip0b52ab1e-1"><rect x="47.09" y="37.5" width="374.01" height="310.56"/></clipPath>
-<g clip-path="url(#clip0b52ab1e-1)">
+<clipPath id="clip92d97f26-1"><rect x="47.09" y="37.5" width="374.01" height="310.56"/></clipPath>
+<g clip-path="url(#clip92d97f26-1)">
 <g class="plt-s" data-s="1">
 <rect x="64.09" y="190.76" width="29.57" height="467.85" fill="#4682b4"/>
 <rect x="138" y="190.76" width="29.57" height="467.85" fill="#4682b4"/>
@@ -3071,8 +3088,8 @@ q_names = [&quot;Accuracy&quot;, &quot;AUC&quot;]
 <rect x="321.1" y="65.83" width="22.22" height="7.78" fill="#ff6347"/>
 <text x="352.21" y="73.72" font-size="11.11">Fine-tuned</text>
 </g>
-<clipPath id="clip0b52ab1e-2"><rect x="488.75" y="37.5" width="374.01" height="310.56"/></clipPath>
-<g clip-path="url(#clip0b52ab1e-2)">
+<clipPath id="clip92d97f26-2"><rect x="488.75" y="37.5" width="374.01" height="310.56"/></clipPath>
+<g clip-path="url(#clip92d97f26-2)">
 <g class="plt-s" data-s="4">
 <rect x="505.76" y="126.79" width="29.57" height="531.82" fill="#4682b4"/>
 <rect x="579.67" y="127.44" width="29.57" height="531.17" fill="#4682b4"/>
@@ -3114,7 +3131,7 @@ q_names = [&quot;Accuracy&quot;, &quot;AUC&quot;]
 <text x="479.03" y="42.5" font-size="13.89" text-anchor="end">1.0</text>
 <text x="675.76" y="25.17" font-size="16.67" text-anchor="middle">AUC</text>
 <script type="text/javascript">//<![CDATA[
-(function(){var svg=document.getElementById("plt3b27c7f23ce5");if(!svg)return;var D={a:[[47.09,37.5,374.01,310.56],[488.75,37.5,374.01,310.56]],t:[[1,0,1,64.09,190.76,29.57,467.85,["Rounded","x: float32","y: 0.7532"],"#4682b4"],
+(function(){var svg=document.getElementById("plt7089db5602b7");if(!svg)return;var D={a:[[47.09,37.5,374.01,310.56],[488.75,37.5,374.01,310.56]],t:[[1,0,1,64.09,190.76,29.57,467.85,["Rounded","x: float32","y: 0.7532"],"#4682b4"],
 [1,0,1,138,190.76,29.57,467.85,["Rounded","x: int8","y: 0.7532"],"#4682b4"],
 [1,0,1,197.13,174.63,29.57,483.98,["Rounded","x: 1.8","y: 0.7792"],"#4682b4"],
 [1,0,1,271.05,182.69,29.57,475.92,["Rounded","x: 2.8","y: 0.7662"],"#4682b4"],

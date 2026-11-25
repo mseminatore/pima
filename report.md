@@ -6,32 +6,36 @@ date: `{clay} Date now format("%m-%d-%Y")`
 
 # Introduction
 
-This is a report summarizing a data analysis conducted on the benchmark machine learning
+This is a report summarizing a data analysis conducted on a benchmark machine learning
 dataset used to predict whether a patient has diabetes based on a collection
 of diagnostic measurements. Originally compiled by the National Institute of 
 Diabetes and Digestive and Kidney Diseases (NIDDK), it contains data for **768** 
-female patients aged 21 and older of Pima Indian heritage living near Phoenix, Arizona. 
+female patients, aged 21 and older, of Pima Indian heritage living near Phoenix, Arizona. 
 
 >Note: The dataset for this analysis was sourced from 
 >[Kaggle.com](https://www.kaggle.com/datasets/kumargh/pimaindiansdiabetescsv).
 
 # Analysis Tools
 
-This analysis was conducted using a NN model written in the [Clay](https://github.com/mseminatore/clay) programming language. Clay is a new prototype-based, pure Object-Oriented language. It runs interpretively like Python and thus allows for rapid analysis of data. Like Python, it has a growing collection of packages (called bricks) that are useful for data analysis. The Clay language shares many traits with Smalltalk and Io.
+The analysis was completed using a Neural Network written in the [Clay](https://github.com/mseminatore/clay) programming language. Clay is a new prototype-based, pure Object-Oriented language. It can run interpretively, like Python, but can also compile to native code for distribution and faster execution. This allows for rapid iteration and analysis of data. Clay has a growing collection of packages that are useful for training models and conducting data analysis. 
 
-A Clay "brick" (a package) called [Clay-ann](https://github.com/mseminatore/clay-ann) provided the NN framework. Clay-ann is a native code brick built on the C neural network library [libann](https://github.com/mseminatore/ann).
+> The Clay language shares many traits with Smalltalk and Io.
 
-This report was generated using the [Clay-knit](https://github.com/mseminatore/clay-knit) brick, which itself uses the [Clay-pdf](https://github.com/mseminatore/clay-pdf) and [Clay-plot](https://github.com/mseminatore/clay-plot) bricks. `Knitting` reports is a concept inspired by the R programming language where a markdown file contains snippets of code that are intermixed with text narrative. The code is executed in chunks with the output visible and available for generating inline tables and figures.
+The Neural Network framework used for this project is called [Clay-ann](https://github.com/mseminatore/clay-ann). Clay-ann is ann add-on `brick` (a Clay package). Clay-ann is a native code brick that wraps the C artificial neural network library [libann](https://github.com/mseminatore/ann).
+
+This report was generated using the [Clay-knit](https://github.com/mseminatore/clay-knit) brick, which in turn uses the [Clay-pdf](https://github.com/mseminatore/clay-pdf) and [Clay-plot](https://github.com/mseminatore/clay-plot) bricks. `Knitting` reports is a concept inspired by the R programming language where a markdown file contains snippets of code that are intermixed with text narrative. The code is executed in chunks with the output visible and available for generating inline tables and figures.
 
 # The Dataset
 
 The Pima dataset describes the medical records for a sampling of Pima Indians. For each patient it records a number of diagnostic features and whether or not they had an onset of diabetes within five years.
 
-The data contains a total of 8 features and one class variable (0: negative and 1: positive for diabetes). The 8 features provided in the dataset include:
+The dataset contains a total of 8 real-valued features, and one class variable (0: negative and 1: positive for diabetes). Below, we setup the project in Clay, naming the 8 features provided in the dataset:
 
 ```clay
+// import the Clay-ann brick
 import("ann")
 
+// name the feature columns
 features = [
     "Preg",
     "Gluc",
@@ -43,6 +47,7 @@ features = [
     "Age"
 ]
 
+// save the count of features for later
 feature_count = features length
 
 // cols where 0 means "missing": Glucose, BloodPressure, SkinThickness, 
@@ -52,7 +57,11 @@ feature_count = features length
 missingCols = [1, 2, 3, 4, 5]
 ```
 
-The units and detailed descriptions of these features are shown in @tbl-features. Of these, only the number of pregnancies can validly be `0`. For all others, a `0` value marks missing data.
+The units and detailed descriptions of these features are shown in @tbl-features below. Of these, only the number of pregnancies can validly be `0`. For all others, a `0` value marks missing data.
+
+## Loading the dataset
+
+The complete dataset is quite small and is stored in a single .csv file of approximately 23 KBytes. Feature data is in the first 8 columns. The output class is the 9th column.
 
 | Col | Name | Description |
 |-----|------|-------------|
@@ -64,22 +73,26 @@ The units and detailed descriptions of these features are shown in @tbl-features
 |6| BMI | Body mass index (weight in kg/(height in m)^2) |
 |7| pedi | Diabetes pedigree function |
 |8| age | Age (years) |
+|9| class| 0 = no Diabetes, 1 = Diabetes
 Table: Feature labels. {#tbl-features}
 
-## Loading the data
-
-The complete dataset is small and is stored in a single .csv file of about 23 KBytes. Feature data is in the first 8 columns. The output class is the 9th column.
+We can load the full dataset into a table using just one line of Clay:
 
 ```clay
     // load the Pima dataset
     "Loading Pima dataset..." println
     data = Ann loadCsv("data/pima-indians-diabetes.csv")
 
-    feature_count = features length
     "Data loaded with ${data cols} cols and ${data rows} rows" println
 ```
 
-The first thing to note from the data is that the two output classes are not evenly balanced. As @fig-balance shows, there are 500 negative and 268 positive patients. Therefore, a model that always predicted "no diabetes" would already be right about 65% of the time. As a result, the final accuracy should be judged against that baseline.
+## Explore dataset characteristics
+
+### Output class balance
+
+The first thing to note from the data is how well the two output classes are balanced. A significant imbalance in training examples can skew the results. As @fig-balance shows, there are 500 negative and 268 positive patients. Therefore, a model that always predicted "no diabetes" would already be right about 65% of the time in predicting test results. As a result, the final accuracy should be judged against that baseline. Specifically, a trained model must exceed 65% accuracy to demonstrate meaningful learning of data signals
+
+Below are the few lines of Clay code required to generate an output class histrogram.
 
 ```{clay #fig-balance caption="Number of patients in each class."}
 class_counts = [0, 0]
@@ -98,9 +111,13 @@ Plot ylabel("Patients")
 Plot title("Classes are not balanced")
 ```
 
-## Cleaning the data
+### Check for missing data
 
-As @fig-zeros below clearly demonstrates, there are a number of missing data entries. These missing entries must be dealt with before training to avoid skewing the results.
+The next step in analyzing a dataset is to check for missing (or malformed) data. Missing data might be zero/nan/inf values, empty strings, or null values. Training with missing data can skew results and even cause crashes. A visual inspection of this small dataset shows missing values marked by zero values. 
+
+> Note: A larger dataset would require a more in-depth scan of the data for missing or invalid entries.
+
+Given this, another few lines of Clay code provides a histogram of missing values by feature:
 
 ```{clay #fig-zeros caption="Number of 0 entries in each feature column."}
 rows = data toArray
@@ -119,9 +136,17 @@ Plot ylabel("Rows with 0")
 Plot title("Missing data by feature")
 ```
 
-The Insulin column is missing the most data with `{clay} zeros at(features indexOf("Insulin"))` empty rows. That represents `{clay} Math round(zeros at(features indexOf("Insulin")) * 100.0 / (data rows))`% of all rows.
+As @fig-zeros below demonstrates, there are a number of missing data entries. These missing entries must be dealt with before training to avoid skewing the results.
 
-The distribution of each feature (raw, before cleaning) is shown in @fig-hist. The spikes at 0 in Glucose, BloodPressure, SkinThickness, Insulin and BMI are the missing values.
+This shows that the Insulin column is missing the most data with `{clay} zeros at(features indexOf("Insulin"))` empty rows. That represents `{clay} Math round(zeros at(features indexOf("Insulin")) * 100.0 / (data rows))`% of all rows. We can also see that Skin thickness is also missing `{clay} zeros at(features indexOf("Skin"))` rows of data.
+
+### Feature space distribution
+
+It is also useful to have an understanding of the overall data distribution of each feature. A feature data histogram (raw, before cleaning) is shown in @fig-hist. 
+
+> Note: The spikes at 0 in Glucose, BloodPressure, SkinThickness, Insulin and BMI are the missing values.
+
+Once again, just a few lines of Clay code are required to build this view into the dataset: 
 
 ```{clay #fig-hist caption="Distribution of each feature before cleaning."}
 hist_rows = data toArray
@@ -137,7 +162,7 @@ feature_count times { |i|
 }
 ```
 
-Splitting the same distributions by outcome, in @fig-byclass, shows which features actually separate the two groups (the missing-value zeros are left out here). Glucose, and to a lesser degree BMI and Age, shift clearly to the right for diabetic patients, while BloodPressure and SkinThickness barely differ.
+We can also split the same distributions by class outcome as in @fig-byclass. This figure shows which features actually separate the two groups (the missing-value zeros are left out here). Glucose, and to a lesser degree BMI and Age, shift clearly to the right for diabetic patients, while BloodPressure and SkinThickness barely differ.
 
 ```{clay #fig-byclass caption="Feature distributions by outcome (missing values excluded)."}
 [cls_fig, cls_axs] = Plot subplots(2, 4, #{figsize: [9, 4.5]})
@@ -164,12 +189,13 @@ feature_count times { |i|
 }
 ```
 
+## Cleaning the data
+
 To analyze the dataset, given many missing values, we need to either drop those rows (losing precious data from such a small dataset), or better, find some way to replace the missing data.
 
-One way to replace, or impute, missing data is to fill empty data columns with the column mean or median. This analysis selected mean.
+One way to replace, or impute, missing data is to fill empty data columns with the column mean, median or mode. Complex analsyis could also be done to synthesize missing values as a function of existing row values. This analysis explored several options and selected the mean.
 
-Several helper functions were created to find the mean
-value of all training_data columns and to use that to replace missing data fields.
+Several helper functions, shown below, were created to find the mean of all `training_data` columns and to use those values to replace missing data fields.
 
 ```clay
     // mean of the non-zero values in each column. Fitted on the training data only,
@@ -224,7 +250,7 @@ value of all training_data columns and to use that to replace missing data field
 
 ## Splitting the data
 
-Now that we have a method for cleaning the data, we can split the full dataset into training, validation and testing groups. We use an 80/10/10 split for this analysis.
+Now that we have a method for cleaning the data, we can split the full dataset into cleaned **training**, **validation** and **testing** groups. We use an 80/10/10 split for this analysis. A 70/20/10 split could also have been used. Given the limited data size, more training data was prioritized.
 
 ```clay
     // split into 80% train, 10% validation (early stopping), 10% test
@@ -250,7 +276,7 @@ Now that we have a method for cleaning the data, we can split the full dataset i
 
 ## Feature correlations
 
-Before modelling, it helps to see how the features relate to each other and to the outcome. @fig-corr shows the Pearson correlation of every pair of columns in the cleaned training data (the last row and column is the diabetes outcome). Glucose has by far the strongest link with the outcome, and several features move together (age and pregnancies, skin thickness and BMI).
+Before investing in modelling and training, it helps to gain an understanding of how the features relate to each other and to the outcome. @fig-corr shows the Pearson correlation of every pair of columns in the cleaned training data (the last row and column is the diabetes outcome). From this view, we can see that measured blood glucose levels has, by far, the strongest link with the outcome, and that several features move together (age and pregnancies, skin thickness and BMI).
 
 ```{clay #fig-corr caption="Correlation matrix of the features and the outcome (training split)."}
 corr_names = features + ["Outcome"]
@@ -293,9 +319,9 @@ corr_n times { |a|
 Plot title("Feature correlations")
 ```
 
-# Model
+# Neural Network Model
 
-Given the 8 input features and 1 output class, and a presumption that the problem was linear-logistic, a simple dense network model was chosen. Since this is a single class output predictor, the loss function was set to `cross_entropy`, which `libann` treats as `Binary Cross Entropy`.
+Given the 8 input features and 1 output class, and a presumption that the problem was linear-logistic, a simple dense network model was chosen. Since this is a single-class output predictor, the loss function was set to `cross_entropy`, which for a single output node `libann` treats as `Binary Cross Entropy`.
 
 For reference, the loss function for Binary Cross Entropy is:
 
@@ -303,17 +329,20 @@ $$BCE = -\frac{1}{N} \sum_{i=1}^{N} [ y_i \log(p_i) + (1 - y_i) \log(1 - p_i) ]$
 
 ## Model details
 
-The dataset is not large, or particularly complex. Thus, a deep NN is not necessary, and only a few small hidden layers will be used. Note that it is likely that an even smaller model may converge as well or better due to the possibility of over-fitting such a small dataset.
+As we've seen, this dataset is not large, or particularly complex. Thus, a deep NN is not necessary, and only a few small hidden layers will be used. Given the limited dataset size, it is likely that an even smaller model might converge as well or better due to the possibility of over-fitting such a small dataset.
 
 > In general the number of parameters in a model should be smaller than the dataset
 > size to avoid over-training and to force generalized learning.
 
-The total parameter count is modest and the model trains very quickly. The following properties were used to configure the network model:
+The following properties were used to configure the network model:
 
 - Validation data with `EarlyStopping` with a `patience` of 10 epochs
 - The `Adam` optimizer with the default learning rate of 0.001
+- Input layer with 8 nodes (node per feature)
 - Two (2) dense hidden layers with 16 and 8 nodes and **ReLU** activation
 - A single dense output layer with **Sigmoid** activation
+
+Using Clay-ann the code to creat this model looks like this:
 
 ```clay
     net = Ann network(#{"earlyStopping": 10, "loss": "cross_entropy", "quiet": true})
@@ -325,9 +354,11 @@ The total parameter count is modest and the model trains very quickly. The follo
     net summary println
 ```
 
+As can be seen from the model summary above, the total parameter count of our model is modest at 289 total parameters, which is well below the 614 rows of training data. Such a small model trains very quickly on modern hardware.
+
 ## Training
 
-Having cleaned the data and defined our network model it is time to train against the data. We use validation data to determine how well the model performs against data it has not seen. This also enables early stopping when validation loss fails to improve.
+Having cleaned the data, and defined our network model, it is time to train against the data. Note that a validation dataset was used to determine how well the model performs against data it has not seen. Providing validation data also enables early-stopping. When the network finds that validation loss fails to improve over a number of epochs, training halts, and the network weights are restored to the best values.
 
 ```clay
     // fraction of rows classified correctly, thresholding the sigmoid output at 0.5.
@@ -363,9 +394,7 @@ Having cleaned the data and defined our network model it is time to train agains
 
 ## Learning curve
 
-As @fig-learn below shows, the training loss continues to show improvement. However, the validation loss levels out at around epoch 54. This is a clear indication of the start of over-training, and that the network is beginning to memorize the training data.
-
-Displaying the learning curve to evaluate training progress requires just a few lines of Clay code.
+As @fig-learn below shows, the training loss continues to show improvement. However, we can also see that the validation loss begins to level out at around epochs 40 - 50. This is a clear indication of the start of over-training, and that the network is beginning to memorize the training data.
 
 ```{clay #fig-learn caption="Learning curve."}
     history = net history
