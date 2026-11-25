@@ -493,7 +493,9 @@ Plot title("Predicted probabilities")
 
 ## Feature importance
 
-Which inputs does the network actually rely on? @fig-importance measures it by permutation: each feature's column in the test split is shifted against the outcomes, breaking its link with them, and the drop in accuracy is recorded (averaged over four different shifts). A bigger drop means the model leans on that feature more. A bar near zero or slightly negative means the model does not use the feature. With only 77 test patients, small differences like these are noise (a shuffle can happen to help by chance), so read the large bars, not the small ones: Glucose and Pregnancies stand out.
+Which inputs does the network actually rely on? @fig-importance measures it by permutation: each feature's column in the test split is shifted against the outcomes, breaking its link with them, and the drop in accuracy is recorded (averaged over four different shifts). A bigger drop means the model leans on that feature more.
+
+A bar near zero or slightly negative means the model does not use the feature. With only 77 test patients, small differences like these are noise (a shuffle can happen to help by chance), so read the large bars, not the small ones: Glucose and Pregnancies stand out.
 
 ```{clay #fig-importance caption="Permutation importance: accuracy lost when a feature is shuffled (test split)."}
 imp_rows = x_test toArray
@@ -535,7 +537,9 @@ Plot title("Permutation importance")
 
 ## What the network learned
 
-Finally, @fig-embed projects the test patients to two dimensions with PCA, colored by outcome. On the left are the 8 standardized input features. On the right is the output of the last hidden layer, which is what the network hands to its output neuron. The hidden layer arranges the patients along the direction the network uses to decide: diabetic patients gather toward the left, negative patients toward the right. The overlap that remains in the middle in both panels reflects the limit of what these 8 measurements can say about diabetes.
+Finally, @fig-embed projects the test patients to two dimensions with PCA, colored by outcome. On the left are the 8 standardized input features. On the right is the output of the last hidden layer, which is what the network hands to its output neuron. The hidden layer arranges the patients along the direction the network uses to decide: diabetic patients gather toward the left, negative patients toward the right. 
+
+The overlap that remains in the middle in both panels reflects the limit of what these 8 measurements can say about diabetes.
 
 ```{clay #fig-embed caption="PCA of the test patients: input features (left) and last hidden layer (right)."}
 embed_classes = y_test toArray map { |r| ((r at(0)) == 1) ifTrue { 1 } ifFalse { 0 } }
