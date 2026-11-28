@@ -4,9 +4,7 @@ A small neural network that predicts the onset of diabetes from the
 [Pima Indians Diabetes dataset](https://www.kaggle.com/datasets/kumargh/pimaindiansdiabetescsv),
 written in [Clay](https://github.com/mseminatore/clay) with the
 [clay-ann](https://github.com/mseminatore/clay-ann) brick. The analysis is a knitted report:
-[`report.md`](report.md) mixes the narrative with the Clay code that loads, cleans and models the
-data, and [clay-knit](https://github.com/mseminatore/clay-knit) runs it into a PDF or web page with
-the output and figures.
+[`report.md`](report.md) which mixes the narrative text with Clay code that loads, cleans, and trains a NN model using the data. Then, [clay-knit](https://github.com/mseminatore/clay-knit) turns it into a PDF or web page with the output and figures.
 
 ## The data
 
