@@ -87,7 +87,7 @@ Pima = Object clone {
 
     // impute and standardize every split using statistics from the training split only
     clean(train_data, val_data, test_data) {
-        "Cleaning data (impute 0s, standardize)..." println
+        Cli warning("Cleaning data (impute 0s, standardize)...") println
         means = imputeMeans(train_data)
         train_data = impute(train_data, means)
         val_data = impute(val_data, means)
@@ -105,12 +105,19 @@ Pima = Object clone {
         net dense(feature_count * 2, "relu")
         net dense(feature_count, "relu")
         net output(1, "sigmoid")
+
+        "\nNetwork structure" println
+        "-----------------" println
+        net summary println
     }
 
     // train on the training rows; the validation rows drive early stopping
     train(x_train, y_train, x_val, y_val) {
+        Cli warning("Training model...") println
         net validation(x_val, y_val)
         net train(x_train, y_train)
+
+        Cli success("Model trained!") println
     }
 
     // fraction of rows classified correctly, thresholding the sigmoid output at 0.5.
@@ -119,6 +126,7 @@ Pima = Object clone {
         xs = x toArray
         ys = y toArray
         correct = 0
+
         i = 0
         { i < xs size } whileTrue {
             p = net predict(xs at(i))
@@ -126,6 +134,7 @@ Pima = Object clone {
             (guess == ((ys at(i)) at(0))) ifTrue { correct = correct + 1 }
             i = i + 1
         }
+        
         (correct * 1.0) / xs size
     }
 
@@ -143,6 +152,8 @@ Pima = Object clone {
         y_test = test_data column(feature_count)
 
         makeNetwork()
+
+
         train(x_train, y_train, x_val, y_val)
 
         "Training accuracy:   ${accuracy(x_train, y_train) * 100}%" println
@@ -151,7 +162,8 @@ Pima = Object clone {
     }
 }
 
-// make it reproducible
+// make training reproducible
 Ann seed(1)
 
+// run our model
 Pima run()
